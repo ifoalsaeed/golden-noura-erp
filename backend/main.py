@@ -5,12 +5,7 @@ from core.config import settings
 from db.database import engine, Base
 
 # Create DB tables (In production use Alembic)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Database connection failed: {e}")
-    # Continue anyway, let the app fail on request if DB is missing
-    # This prevents the build/health check from failing immediately
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

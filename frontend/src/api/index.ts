@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+const baseURL = import.meta.env.VITE_API_URL || 'https://golden-noura-erp.onrender.com/api/v1';
 
 const api = axios.create({
     baseURL,
