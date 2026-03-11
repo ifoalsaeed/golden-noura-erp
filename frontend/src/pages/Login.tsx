@@ -1,22 +1,62 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, User, Globe } from 'lucide-react';
+import { Globe } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    navigate('/dashboard');
-  };
-
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
-  }, [i18n.language]);
+    // If already logged in, go to dashboard
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      navigate('/dashboard');
+    }
+  }, [i18n.language, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString(),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('token', data.access_token || '');
+        navigate('/dashboard');
+      } else {
+        setError(t('Invalid username or password'));
+      }
+    } catch {
+      // If backend is unreachable, allow demo login
+      if (username === 'admin' && password === 'admin') {
+        localStorage.setItem('isLoggedIn', 'true');
+        navigate('/dashboard');
+      } else {
+        setError(t('Connection error. Use admin/admin for demo.'));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'ar' ? 'bn' : 'ar';
@@ -46,6 +86,12 @@ export default function Login() {
           <p className="text-gn-goldLight text-sm font-medium tracking-wider uppercase">{t('Golden Noura ERP')}</p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm text-center">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 block text-start">{t('Username')}</label>
@@ -59,8 +105,8 @@ export default function Login() {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="block w-full px-4 py-3 bg-gn-blackLight border border-gn-surface rounded-lg text-white focus:ring-1 focus:ring-gn-gold focus:border-gn-gold" required />
             </div>
           </div>
-          <button type="submit" className="w-full mt-8 py-3 px-4 bg-gradient-to-r from-gn-gold to-gn-goldDark hover:from-gn-goldLight hover:to-gn-gold text-gn-black font-bold text-lg rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all">
-            {t('Login')}
+          <button type="submit" disabled={loading} className="w-full mt-8 py-3 px-4 bg-gradient-to-r from-gn-gold to-gn-goldDark hover:from-gn-goldLight hover:to-gn-gold text-gn-black font-bold text-lg rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all disabled:opacity-50">
+            {loading ? '...' : t('Login')}
           </button>
         </form>
       </div>

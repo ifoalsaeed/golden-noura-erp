@@ -7,12 +7,17 @@ import Contracts from './pages/Contracts';
 import Layout from './components/layout/Layout';
 import './i18n';
 
+function PrivateRoute({ children }: { children: JSX.Element }) {
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  return isLoggedIn ? children : <Navigate to="/login" replace />;
+}
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="workers" element={<Workers />} />
@@ -22,6 +27,7 @@ function App() {
           <Route path="expenses" element={<div className="p-6">Expenses Module... UI in progress</div>} />
           <Route path="reports" element={<div className="p-6">Reports... UI in progress</div>} />
         </Route>
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
   );
