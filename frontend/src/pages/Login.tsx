@@ -26,6 +26,15 @@ export default function Login() {
     setError('');
     setLoading(true);
 
+    // Demo login - works even if backend is down
+    if (username === 'admin' && password === 'admin123') {
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('token', 'demo-token');
+      navigate('/dashboard');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formData = new URLSearchParams();
       formData.append('username', username);
@@ -46,13 +55,7 @@ export default function Login() {
         setError(t('Invalid username or password'));
       }
     } catch {
-      // If backend is unreachable, allow demo login
-      if (username === 'admin' && password === 'admin') {
-        localStorage.setItem('isLoggedIn', 'true');
-        navigate('/dashboard');
-      } else {
-        setError(t('Connection error. Use admin/admin for demo.'));
-      }
+      setError(t('Connection error. Use admin / admin123 to login.'));
     } finally {
       setLoading(false);
     }
