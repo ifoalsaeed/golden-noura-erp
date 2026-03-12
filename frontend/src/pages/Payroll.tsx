@@ -1,68 +1,281 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DollarSign, Plus, Search, Calculator } from 'lucide-react';
+import { DollarSign, User, Calendar, Plus, RefreshCw, CheckCircle, Clock } from 'lucide-react';
+import DataEntryModal from '../components/common/DataEntryModal';
+
+const API_URL = import.meta.env.VITE_API_URL || '';
+
+interface Worker {
+  id: number;
+  name: string;
+  salary: number;
+  profession: string;
+}
+
+interface PayrollRecord {
+  id: number;
+  worker_id: number;
+  month: number;
+  year: number;
+  net_salary: number;
+  is_paid: boolean;
+  worker?: Worker;
+}
 
 export default function Payroll() {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
+  const [records, setRecords] = useState<PayrollRecord[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
-    // بيانات تجريبية مؤقتة عشان تشوف الشكل النهائي لنظام الرواتب
-    const [payrolls] = useState([
-        { id: 1, workerName: 'أحمد علي', base: 3000, overtime: 200, allowances: 500, deductions: 100, advances: 0, net: 3600, profit: 800 },
-        { id: 2, workerName: 'محمد كبير (بنغالي)', base: 2500, overtime: 0, allowances: 300, deductions: 0, advances: 500, net: 2300, profit: 1200 },
-    ]);
+  // Form State
+  const [formData, setFormData] = useState({
+    worker_id: '',
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    bonuses: '0',
+    deductions: '0',
+    overtime: '0'
+  });
 
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white flex items-center">
-                    <DollarSign className="w-8 h-8 ml-3 text-gn-gold" />
-                    {t('Payroll')}
-                </h2>
-                <div className="flex gap-4">
-                    <button onClick={() => alert('تم تفعيل الحساب الأوتوماتيكي! جاري جلب البيانات...')} className="bg-gn-surface hover:bg-gn-surface/80 border border-gn-gold/50 text-gn-gold font-bold py-2 px-4 rounded-lg flex items-center transition">
-                        <Calculator className="w-5 h-5 ml-2" /> حساب أوتوماتيكي
-                    </button>
-                    <button onClick={() => alert('تم تفعيل هذه الميزة بنجاح. سيتم فتح نافذة الإضافة قريباً')} className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-4 rounded-lg flex items-center transition">
-                        <Plus className="w-5 h-5 ml-2" /> سجل جديد
-                    </button>
-                </div>
-            </div>
+  const fetchData = async () => {
+    try {
+      const [pResp, wResp] = await Promise.all([
+        fetch(`${API_URL}/api/v1/payroll/`),
+        fetch(`${API_URL}/api/v1/workers/`)
+      ]);
+      if (pResp.ok) {
+        const pData = await pResp.json();
+        // The endpoint returns basic payroll, but table needs worker name
+        // In a real system we'd join on backend, but here we can map if needed 
+        // Or just show ID if name is not available in basic response
+        setRecords(pData);
+      }
+      if (wResp.ok) setWorkers(await wResp.json());
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFetching(false);
+    }
+  };
 
-            <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-6 shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                    <div className="relative w-72">
-                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <input type="text" placeholder="ابحث باسم العامل..." className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pr-10 pl-4 py-2 text-white focus:outline-none focus:border-gn-gold" />
-                    </div>
-                </div>
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-right text-gray-300">
-                        <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface">
-                            <tr>
-                                <th className="px-4 py-4">اسم العامل</th>
-                                <th className="px-4 py-4">الراتب الأساسي</th>
-                                <th className="px-4 py-4 text-green-400">+ إضافي وبدلات</th>
-                                <th className="px-4 py-4 text-red-400">- خصومات وسلف</th>
-                                <th className="px-4 py-4 font-bold text-gn-gold">صافي الراتب المستحق</th>
-                                <th className="px-4 py-4 text-blue-400">أرباح الشركة (تلقائي)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {payrolls.map((row) => (
-                                <tr key={row.id} className="border-b border-gn-surface hover:bg-gn-blackLight/30 transition-colors">
-                                    <td className="px-4 py-4 font-medium text-white">{row.workerName}</td>
-                                    <td className="px-4 py-4">{row.base} ريال</td>
-                                    <td className="px-4 py-4 text-green-400">{row.overtime + row.allowances} ريال</td>
-                                    <td className="px-4 py-4 text-red-400">{row.deductions + row.advances} ريال</td>
-                                    <td className="px-4 py-4 font-bold text-gn-gold">{row.net} ريال</td>
-                                    <td className="px-4 py-4 text-blue-400 whitespace-nowrap">{row.profit} ريال</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+  const handleSubmit = async () => {
+    if (!formData.worker_id) return;
+    setLoading(true);
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/payroll/calculate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          worker_id: parseInt(formData.worker_id),
+          month: formData.month,
+          year: formData.year,
+          bonuses: parseFloat(formData.bonuses),
+          deductions: parseFloat(formData.deductions),
+          overtime: parseFloat(formData.overtime)
+        })
+      });
+      if (resp.ok) {
+        await fetchData();
+        setIsModalOpen(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAsPaid = async (id: number) => {
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/payroll/${id}/pay`, {
+        method: 'PATCH'
+      });
+      if (resp.ok) fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getWorkerName = (id: number) => {
+    return workers.find(w => w.id === id)?.name || '...';
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-white">{t('Payroll')}</h2>
+        <div className="flex gap-4">
+          <button 
+            onClick={fetchData}
+            className="p-2 bg-gn-surface border border-gn-surface rounded-lg text-gray-400 hover:text-gn-gold transition"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg"
+          >
+            <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Process Payroll')}
+          </button>
         </div>
-    );
+      </div>
+
+      <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-6 shadow-lg">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-gray-300">
+            <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface">
+              <tr>
+                <th className="px-6 py-4">{t('Worker')}</th>
+                <th className="px-6 py-4">{t('Period')}</th>
+                <th className="px-6 py-4">{t('Net Salary')}</th>
+                <th className="px-6 py-4">{t('Status')}</th>
+                <th className="px-6 py-4">{t('Action')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gn-surface">
+              {fetching ? (
+                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('Loading')}...</td></tr>
+              ) : records.length === 0 ? (
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('No data available')}</td></tr>
+              ) : (
+                records.map((rec) => (
+                  <tr key={rec.id} className="hover:bg-gn-blackLight/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gn-gold/10 flex items-center justify-center mr-3 ml-3 text-gn-gold font-bold">
+                          {getWorkerName(rec.worker_id).charAt(0)}
+                        </div>
+                        <span className="font-medium text-white">{getWorkerName(rec.worker_id)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm">{rec.month}/{rec.year}</td>
+                    <td className="px-6 py-4 font-bold text-green-400">SAR {rec.net_salary.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-sm">
+                      {rec.is_paid ? (
+                        <span className="flex items-center text-green-400">
+                          <CheckCircle className="w-4 h-4 mr-1 ml-1" /> {t('Paid')}
+                        </span>
+                      ) : (
+                        <span className="flex items-center text-yellow-500">
+                          <Clock className="w-4 h-4 mr-1 ml-1" /> {t('Processing')}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 flex gap-3">
+                      <button className="text-gn-gold hover:text-gn-goldLight text-sm font-medium transition">
+                        {t('View Details')}
+                      </button>
+                      {!rec.is_paid && (
+                        <button 
+                          onClick={() => handleMarkAsPaid(rec.id)}
+                          className="text-green-400 hover:text-green-300 text-sm font-medium transition"
+                        >
+                          {t('Mark as Paid')}
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <DataEntryModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title="Process Payroll"
+        onSubmit={handleSubmit}
+        loading={loading}
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-400 flex items-center">
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Worker')}
+            </label>
+            <select 
+              value={formData.worker_id}
+              onChange={(e) => setFormData({...formData, worker_id: e.target.value})}
+              className="w-full bg-gn-blackLight border border-gn-surface rounded-lg px-4 py-3 text-white focus:border-gn-gold outline-none"
+              required
+            >
+              <option value="">{t('Select Worker')}</option>
+              {workers.map(w => (
+                <option key={w.id} value={w.id}>{w.name} ({w.profession})</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Month')}
+              </label>
+              <input 
+                type="number" min="1" max="12"
+                value={formData.month}
+                onChange={(e) => setFormData({...formData, month: parseInt(e.target.value)})}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Year')}
+              </label>
+              <input 
+                type="number"
+                value={formData.year}
+                onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Plus className="w-4 h-4 mr-2 ml-2 text-green-400" /> {t('Bonuses')}
+              </label>
+              <input 
+                type="number"
+                value={formData.bonuses}
+                onChange={(e) => setFormData({...formData, bonuses: e.target.value})}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Plus className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Overtime')}
+              </label>
+              <input 
+                type="number"
+                value={formData.overtime}
+                onChange={(e) => setFormData({...formData, overtime: e.target.value})}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Plus className="w-4 h-4 mr-2 ml-2 text-red-400" /> {t('Deductions')}
+              </label>
+              <input 
+                type="number"
+                value={formData.deductions}
+                onChange={(e) => setFormData({...formData, deductions: e.target.value})}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+          </div>
+        </div>
+      </DataEntryModal>
+    </div>
+  );
 }
