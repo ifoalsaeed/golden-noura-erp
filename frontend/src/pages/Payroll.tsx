@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DollarSign, User, Calendar, Plus, RefreshCw, CheckCircle, Clock } from 'lucide-react';
+import { DollarSign, User, Calendar, Plus, RefreshCw, CheckCircle, Clock, Trash2, Edit } from 'lucide-react';
 import DataEntryModal from '../components/common/DataEntryModal';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -29,6 +29,7 @@ export default function Payroll() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -48,9 +49,6 @@ export default function Payroll() {
       ]);
       if (pResp.ok) {
         const pData = await pResp.json();
-        // The endpoint returns basic payroll, but table needs worker name
-        // In a real system we'd join on backend, but here we can map if needed 
-        // Or just show ID if name is not available in basic response
         setRecords(pData);
       }
       if (wResp.ok) setWorkers(await wResp.json());
@@ -65,12 +63,40 @@ export default function Payroll() {
     fetchData();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm(t('Are you sure?'))) return;
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/payroll/${id}`, { method: 'DELETE' });
+      if (resp.ok) {
+        setRecords(records.filter(r => r.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (rec: PayrollRecord) => {
+    setEditingId(rec.id);
+    setFormData({
+      worker_id: rec.worker_id.toString(),
+      month: rec.month,
+      year: rec.year,
+      bonuses: '0', // We can't easily fetch old sub-components unless backend stores them,
+      deductions: '0', // but the schema has them. We'll set 0 and let user override
+      overtime: '0'
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async () => {
     if (!formData.worker_id) return;
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/api/v1/payroll/calculate`, {
-        method: 'POST',
+      const url = editingId ? `${API_URL}/api/v1/payroll/${editingId}` : `${API_URL}/api/v1/payroll/calculate`;
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const resp = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           worker_id: parseInt(formData.worker_id),
@@ -84,6 +110,7 @@ export default function Payroll() {
       if (resp.ok) {
         await fetchData();
         setIsModalOpen(false);
+        setEditingId(null);
       }
     } catch (err) {
       console.error(err);
@@ -168,18 +195,31 @@ export default function Payroll() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 flex gap-3">
-                      <button className="text-gn-gold hover:text-gn-goldLight text-sm font-medium transition">
-                        {t('View Details')}
-                      </button>
+                    <td className="px-6 py-4 flex gap-4 items-center">
                       {!rec.is_paid && (
-                        <button 
-                          onClick={() => handleMarkAsPaid(rec.id)}
-                          className="text-green-400 hover:text-green-300 text-sm font-medium transition"
-                        >
-                          {t('Mark as Paid')}
-                        </button>
+                        <>
+                          <button 
+                            onClick={() => handleMarkAsPaid(rec.id)}
+                            className="px-3 py-1 bg-green-500/10 text-green-400 hover:bg-green-500/20 text-xs font-bold rounded-lg transition border border-green-500/20"
+                          >
+                            {t('Mark as Paid')}
+                          </button>
+                          <button 
+                            onClick={() => handleEdit(rec)}
+                            className="p-2 text-gn-gold hover:bg-gn-gold/10 rounded-lg transition" 
+                            title={t('Edit')}
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                        </>
                       )}
+                      <button 
+                        onClick={() => handleDelete(rec.id)}
+                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition" 
+                        title={t('Delete')}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     </td>
                   </tr>
                 ))

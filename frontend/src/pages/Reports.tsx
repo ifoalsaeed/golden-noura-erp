@@ -1,99 +1,115 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, TrendingDown, DollarSign, Download, Calendar, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from 'recharts';
+import { TrendingUp, TrendingDown, DollarSign, Download, Calendar, ArrowUpRight, ArrowDownRight, PieChart, BarChart3, List, Scale, MoveRight, Receipt } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Cell, PieChart as RePieChart, Pie } from 'recharts';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+type TabType = 'overview' | 'pl' | 'balance' | 'cashflow' | 'insights';
+
 export default function Reports() {
   const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState({
+  const [data, setData] = useState<any>({
     revenue: 0,
     expenses: 0,
     profit: 0,
-    timeline: []
+    timeline: [],
+    pl: null,
+    balance: null,
+    cashflow: null,
+    insights: { workers: [], companies: [] }
   });
+  const [exporting, setExporting] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
+  const handleExport = async (format: 'excel' | 'csv' = 'excel') => {
+    setExporting(format);
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/reports/export?format=${format}`);
+      if (!resp.ok) throw new Error('Export failed');
+      const blob = await resp.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Golden_Noura_Report_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error(err);
+      alert('Export failed. Please check the console.');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === 'overview') {
         const [sumResp, lineResp] = await Promise.all([
           fetch(`${API_URL}/api/v1/reports/summary`),
           fetch(`${API_URL}/api/v1/reports/timeline`)
         ]);
-        
         if (sumResp.ok && lineResp.ok) {
           const sumData = await sumResp.json();
           const lineData = await lineResp.json();
-          setData({
-            ...sumData,
-            timeline: lineData
-          });
+          setData((prev: any) => ({ ...prev, ...sumData, timeline: lineData }));
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+      } else if (activeTab === 'pl') {
+        const resp = await fetch(`${API_URL}/api/v1/reports/profit-loss`);
+        if (resp.ok) {
+          const plData = await resp.json();
+          setData((prev: any) => ({ ...prev, pl: plData }));
+        }
+      } else if (activeTab === 'balance') {
+        const resp = await fetch(`${API_URL}/api/v1/reports/balance-sheet`);
+        if (resp.ok) {
+          const balanceData = await resp.json();
+          setData((prev: any) => ({ ...prev, balance: balanceData }));
+        }
+      } else if (activeTab === 'cashflow') {
+        const resp = await fetch(`${API_URL}/api/v1/reports/cash-flow`);
+        if (resp.ok) {
+          const cfData = await resp.json();
+          setData((prev: any) => ({ ...prev, cashflow: cfData }));
+        }
+      } else if (activeTab === 'insights') {
+        const [wResp, cResp] = await Promise.all([
+          fetch(`${API_URL}/api/v1/reports/profit-per-worker`),
+          fetch(`${API_URL}/api/v1/reports/profit-per-company`)
+        ]);
+        if (wResp.ok && cResp.ok) {
+          const wData = await wResp.json();
+          const cData = await cResp.json();
+          setData((prev: any) => ({ ...prev, insights: { workers: wData, companies: cData } }));
+        }
       }
-    };
-    fetchReports();
-  }, []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Reports Overview')}</h2>
-        <button className="flex items-center gap-2 bg-gn-surface border border-gn-surface hover:border-gn-gold/50 text-white px-4 py-2 rounded-lg transition">
-          <Download className="w-5 h-5 text-gn-gold" /> {t('Export to Excel')}
-        </button>
-      </div>
+  useEffect(() => {
+    fetchData();
+  }, [activeTab]);
 
+  const renderOverview = () => (
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl relative overflow-hidden group hover:border-gn-gold/30 transition-all">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingUp className="w-12 h-12 text-gn-gold" />
-          </div>
-          <p className="text-gray-400 text-sm font-medium">{t('Revenue')}</p>
-          <div className="flex items-end gap-2 mt-2">
-            <h3 className="text-3xl font-bold text-white">SAR {data.revenue.toLocaleString()}</h3>
-            <span className="text-green-400 text-sm flex items-center mb-1">
-              <ArrowUpRight className="w-4 h-4" /> +12%
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl relative overflow-hidden group hover:border-red-500/30 transition-all">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <TrendingDown className="w-12 h-12 text-red-500" />
-          </div>
-          <p className="text-gray-400 text-sm font-medium">{t('Expenses')}</p>
-          <div className="flex items-end gap-2 mt-2">
-            <h3 className="text-3xl font-bold text-white">SAR {data.expenses.toLocaleString()}</h3>
-            <span className="text-red-400 text-sm flex items-center mb-1">
-              <ArrowDownRight className="w-4 h-4" /> +5%
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-gn-gold/10 border border-gn-gold/20 p-6 rounded-2xl relative overflow-hidden group hover:bg-gn-gold/20 transition-all">
-          <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity text-gn-gold">
-            <TrendingUp className="w-12 h-12" />
-          </div>
-          <p className="text-gn-goldLight text-sm font-medium">{t('Net Profit')}</p>
-          <div className="flex items-end gap-2 mt-2">
-            <h3 className="text-3xl font-bold text-white">SAR {data.profit.toLocaleString()}</h3>
-            <span className="text-gn-gold text-sm flex items-center mb-1">
-              <ArrowUpRight className="w-4 h-4" /> +8%
-            </span>
-          </div>
-        </div>
+        <SummaryCard title="Revenue" amount={data.revenue} icon={<TrendingUp className="w-8 h-8 text-gn-gold" />} trend="+12%" color="gold" />
+        <SummaryCard title="Expenses" amount={data.expenses} icon={<TrendingDown className="w-8 h-8 text-red-500" />} trend="+5%" color="red" />
+        <SummaryCard title="Net Profit" amount={data.profit} icon={<TrendingUp className="w-8 h-8 text-green-500" />} trend="+8%" color="green" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl shadow-xl h-[400px]">
+        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl h-[400px]">
           <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-             <TrendingUp className="w-5 h-5 text-gn-gold" /> {t('Revenue vs Expenses')}
+             <BarChart3 className="w-5 h-5 text-gn-gold" /> {t('Revenue vs Expenses')}
           </h4>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data.timeline}>
@@ -109,35 +125,344 @@ export default function Reports() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" vertical={false} />
               <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `SAR ${val/1000}k`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
-                itemStyle={{ fontSize: '12px' }}
-              />
+              <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `SAR ${val}`} />
+              <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} />
               <Area type="monotone" dataKey="revenue" stroke="#D4AF37" fillOpacity={1} fill="url(#colorRev)" strokeWidth={3} />
               <Area type="monotone" dataKey="expenses" stroke="#f87171" fillOpacity={1} fill="url(#colorExp)" strokeWidth={3} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl shadow-xl h-[400px]">
+        <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl h-[400px]">
           <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-             <TrendingUp className="w-5 h-5 text-gn-gold" /> {t('Profit Growth')}
+             <PieChart className="w-5 h-5 text-gn-gold" /> {t('Revenue Distribution')}
           </h4>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.timeline}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f1f1f" vertical={false} />
               <XAxis dataKey="name" stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `SAR ${val/1000}k`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }}
-                cursor={{ fill: '#ffffff05' }}
-              />
+              <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={false} />
+              <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px' }} />
               <Bar dataKey="revenue" fill="#D4AF37" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
+    </div>
+  );
+
+  const renderPL = () => {
+    if (!data.pl) return <LoadingSpinner />;
+    return (
+      <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
+        <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-8 overflow-hidden">
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <h3 className="text-2xl font-bold text-white">{t('Profit & Loss Statement')}</h3>
+              <p className="text-gray-400 text-sm mt-1">{new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
+            </div>
+            <div className={`px-6 py-2 rounded-full font-bold text-lg ${data.pl.net_profit >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+              {t('Net Profit')}: SAR {data.pl.net_profit.toLocaleString()}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <section className="space-y-4">
+              <h4 className="text-gn-gold font-bold flex items-center gap-2 border-b border-gn-surface pb-2">
+                <TrendingUp className="w-5 h-5" /> {t('Revenue')}
+              </h4>
+              <div className="space-y-3">
+                {data.pl.revenue_items.map((item: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center group">
+                    <span className="text-gray-300 group-hover:text-white transition">{item.category}</span>
+                    <span className="text-white font-medium">SAR {item.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between items-center pt-4 border-t border-gn-surface font-bold text-white">
+                  <span>{t('Total Revenue')}</span>
+                  <span>SAR {data.pl.total_revenue.toLocaleString()}</span>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <h4 className="text-red-400 font-bold flex items-center gap-2 border-b border-gn-surface pb-2">
+                <TrendingDown className="w-5 h-5" /> {t('Expenses')}
+              </h4>
+              <div className="space-y-3">
+                {data.pl.expense_items.map((item: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center group">
+                    <span className="text-gray-300 group-hover:text-white transition">{item.category}</span>
+                    <span className="text-white font-medium">SAR {item.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between items-center pt-4 border-t border-gn-surface font-bold text-white">
+                  <span>{t('Total Expenses')}</span>
+                  <span>SAR {data.pl.total_expenses.toLocaleString()}</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderBalanceSheet = () => {
+    if (!data.balance) return <LoadingSpinner />;
+    const { assets, liabilities, equity } = data.balance;
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in slide-in-from-left duration-500">
+        <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Scale className="w-6 h-6 text-gn-gold" /> {t('Assets')}
+          </h3>
+          <div className="space-y-4">
+            {assets.items.map((item: any, i: number) => (
+              <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
+                <span className="text-gray-400">{item.name} <span className="text-xs ml-2 opacity-50">({item.code})</span></span>
+                <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+              </div>
+            ))}
+            <div className="flex justify-between p-4 bg-gn-gold/10 border border-gn-gold/20 rounded-xl font-bold text-white mt-8">
+              <span>{t('Total Assets')}</span>
+              <span>SAR {assets.total.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <Receipt className="w-6 h-6 text-red-400" /> {t('Liabilities')}
+            </h3>
+            <div className="space-y-4">
+              {liabilities.items.map((item: any, i: number) => (
+                <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
+                  <span className="text-gray-400">{item.name}</span>
+                  <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+                </div>
+              ))}
+              <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
+                <span>{t('Total Liabilities')}</span>
+                <span>SAR {liabilities.total.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <MoveRight className="w-6 h-6 text-green-400" /> {t('Equity')}
+            </h3>
+            <div className="space-y-4">
+              {equity.items.map((item: any, i: number) => (
+                <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
+                  <span className="text-gray-400">{item.name}</span>
+                  <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+                </div>
+              ))}
+              <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
+                <span>{t('Total Equity')}</span>
+                <span>SAR {equity.total.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCashFlow = () => {
+    if (!data.cashflow) return <LoadingSpinner />;
+    return (
+      <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-8 animate-in zoom-in duration-500">
+        <div className="flex items-center gap-4 mb-10">
+          <div className="p-3 bg-gn-gold/20 rounded-xl">
+             <DollarSign className="w-8 h-8 text-gn-gold" />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold text-white">{t('Cash Flow Analysis')}</h3>
+            <p className="text-gray-400 text-sm">{t('Tracking cash movement in and out')}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+           <div className="space-y-6">
+              <h4 className="text-green-400 font-bold flex items-center gap-2">
+                <ArrowUpRight className="w-5 h-5" /> {t('Cash Inflows')}
+              </h4>
+              <div className="space-y-4">
+                {data.cashflow.inflow.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-green-500/5 border border-green-500/10 rounded-xl">
+                    <span className="text-gray-300">{item.category}</span>
+                    <span className="text-green-400 font-bold">+ SAR {item.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+           </div>
+
+           <div className="space-y-6">
+              <h4 className="text-red-400 font-bold flex items-center gap-2">
+                <ArrowDownRight className="w-5 h-5" /> {t('Cash Outflows')}
+              </h4>
+              <div className="space-y-4">
+                {data.cashflow.outflow.map((item: any, i: number) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-red-500/5 border border-red-500/10 rounded-xl">
+                    <span className="text-gray-300">{item.category}</span>
+                    <span className="text-red-400 font-bold">- SAR {item.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+           </div>
+        </div>
+
+        <div className="mt-12 p-6 bg-gn-blackLight/50 rounded-2xl border border-gn-surface flex justify-between items-center">
+            <span className="text-lg text-gray-400">{t('Net Cash Increase/Decrease')}</span>
+            <span className={`text-2xl font-black ${data.cashflow.net_cash_flow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              SAR {data.cashflow.net_cash_flow.toLocaleString()}
+            </span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderInsights = () => {
+    if (!data.insights) return <LoadingSpinner />;
+    return (
+      <div className="space-y-8 animate-in fade-in duration-700">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <PieChart className="w-6 h-6 text-gn-gold" /> {t('Profit per Worker')}
+            </h3>
+            <div className="space-y-4">
+              {data.insights.workers.slice(0, 5).map((w: any, i: number) => (
+                <div key={i} className="flex justify-between items-center p-4 bg-gn-blackLight/30 rounded-xl hover:bg-gn-gold/5 transition group">
+                  <div>
+                    <p className="text-white font-bold group-hover:text-gn-gold flex items-center gap-2">
+                       <ArrowUpRight className="w-4 h-4 text-green-500" /> {w.worker_name}
+                    </p>
+                    <p className="text-gray-500 text-xs">Rev: SAR {w.revenue} | Cost: SAR {w.cost}</p>
+                  </div>
+                  <span className="text-green-400 font-bold">SAR {w.profit.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6 text-blue-400" /> {t('Profit per Company')}
+            </h3>
+            <div className="space-y-4">
+              {data.insights.companies.slice(0, 5).map((c: any, i: number) => (
+                <div key={i} className="flex justify-between items-center p-4 bg-gn-blackLight/30 rounded-xl hover:bg-gn-white/5 transition">
+                  <div>
+                    <p className="text-white font-bold">{c.company_name}</p>
+                    <p className="text-gray-500 text-xs">{c.active_workers} {t('Active Workers')}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gn-gold font-bold">SAR {c.profit.toLocaleString()}</p>
+                    <p className="text-[10px] text-gray-500">Margin: {((c.profit/c.revenue)*100).toFixed(1)}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-white">{t('Financial Intelligence')}</h2>
+          <p className="text-gray-400 text-xs mt-1">{t('Real-time insights into your manpower operations')}</p>
+        </div>
+        <div className="flex flex-wrap gap-3 items-center">
+          <button 
+            onClick={() => handleExport('excel')}
+            disabled={!!exporting}
+            className={`flex items-center gap-2 px-6 py-2 ${exporting === 'excel' ? 'bg-gn-surface text-gray-400' : 'bg-gn-gold hover:bg-gn-gold/90 text-gn-black'} font-bold rounded-xl transition shadow-lg shadow-gn-gold/20`}
+          >
+            <Download className="w-4 h-4" />
+            {exporting === 'excel' ? t('Loading') : t('Export to Excel')}
+          </button>
+          <button 
+            onClick={() => handleExport('csv')}
+            disabled={!!exporting}
+            className={`flex items-center gap-2 px-6 py-2 ${exporting === 'csv' ? 'bg-gn-surface text-gray-400' : 'bg-gn-white/10 text-white hover:bg-gn-white/20'} font-bold rounded-xl transition border border-gn-surface`}
+          >
+            <Download className="w-4 h-4" />
+            {exporting === 'csv' ? t('Loading') : t('Export to CSV')}
+          </button>
+          <div className="flex bg-gn-surface/50 p-1 rounded-xl border border-gn-surface">
+            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<TrendingUp className="w-4 h-4" />} label="Overview" />
+            <TabButton active={activeTab === 'pl'} onClick={() => setActiveTab('pl')} icon={<Receipt className="w-4 h-4" />} label="P&L" />
+            <TabButton active={activeTab === 'balance'} onClick={() => setActiveTab('balance')} icon={<Scale className="w-4 h-4" />} label="Balance" />
+            <TabButton active={activeTab === 'cashflow'} onClick={() => setActiveTab('cashflow')} icon={<MoveRight className="w-4 h-4" />} label="Cash Flow" />
+            <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<PieChart className="w-4 h-4" />} label="Insights" />
+          </div>
+        </div>
+      </div>
+
+      {loading ? <LoadingSpinner /> : (
+        <>
+          {activeTab === 'overview' && renderOverview()}
+          {activeTab === 'pl' && renderPL()}
+          {activeTab === 'balance' && renderBalanceSheet()}
+          {activeTab === 'cashflow' && renderCashFlow()}
+          {activeTab === 'insights' && renderInsights()}
+        </>
+      )}
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, icon, label }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+        active 
+          ? 'bg-gn-gold text-gn-black shadow-lg' 
+          : 'text-gray-400 hover:text-white hover:bg-gn-white/5'
+      }`}
+    >
+      {icon} {label}
+    </button>
+  );
+}
+
+function SummaryCard({ title, amount, icon, trend, color }: any) {
+  const colorMap: any = {
+    gold: 'hover:border-gn-gold/30',
+    red: 'hover:border-red-500/30',
+    green: 'hover:border-green-500/30'
+  };
+  return (
+    <div className={`bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl relative overflow-hidden group transition-all ${colorMap[color]}`}>
+      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+        {icon}
+      </div>
+      <p className="text-gray-400 text-sm font-medium">{title}</p>
+      <div className="flex items-end gap-2 mt-2">
+        <h3 className="text-3xl font-bold text-white">SAR {amount.toLocaleString()}</h3>
+        <span className={`text-sm flex items-center mb-1 ${color === 'red' ? 'text-red-400' : 'text-green-400'}`}>
+          <ArrowUpRight className="w-4 h-4" /> {trend}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+      <div className="w-12 h-12 border-4 border-gn-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p className="text-gray-500">Generating report data...</p>
     </div>
   );
 }

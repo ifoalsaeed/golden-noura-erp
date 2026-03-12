@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wallet, Plus, Search, Calendar, FileText, DollarSign } from 'lucide-react';
+import { Wallet, Plus, Search, Calendar, FileText, DollarSign, Trash2, Edit } from 'lucide-react';
 import DataEntryModal from '../components/common/DataEntryModal';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -19,6 +19,7 @@ export default function Expenses() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -46,12 +47,38 @@ export default function Expenses() {
     fetchExpenses();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm(t('Are you sure?'))) return;
+    try {
+      const resp = await fetch(`${API_URL}/api/v1/expenses/${id}`, { method: 'DELETE' });
+      if (resp.ok) {
+        setExpenses(expenses.filter(e => e.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (exp: Expense) => {
+    setEditingId(exp.id);
+    setFormData({
+      category: exp.category,
+      amount: exp.amount.toString(),
+      description: exp.description,
+      date: exp.date
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async () => {
     if (!formData.amount || !formData.description) return;
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/api/v1/expenses/`, {
-        method: 'POST',
+      const url = editingId ? `${API_URL}/api/v1/expenses/${editingId}` : `${API_URL}/api/v1/expenses/`;
+      const method = editingId ? 'PUT' : 'POST';
+      
+      const resp = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -61,6 +88,7 @@ export default function Expenses() {
       if (resp.ok) {
         await fetchExpenses();
         setIsModalOpen(false);
+        setEditingId(null);
         setFormData({
           category: 'General',
           amount: '',
@@ -112,13 +140,14 @@ export default function Expenses() {
                 <th className="px-6 py-4">{t('Category')}</th>
                 <th className="px-6 py-4">{t('Description')}</th>
                 <th className="px-6 py-4">{t('Amount')}</th>
+                <th className="px-6 py-4 text-center">{t('Action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface">
               {fetching ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center">{t('Loading')}...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('Loading')}...</td></tr>
               ) : expenses.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-center text-gray-500">{t('No data available')}</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('No data available')}</td></tr>
               ) : (
                 expenses.map((exp) => (
                   <tr key={exp.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -130,6 +159,14 @@ export default function Expenses() {
                     </td>
                     <td className="px-6 py-4 text-sm">{exp.description}</td>
                     <td className="px-6 py-4 font-bold text-white">SAR {exp.amount.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-center flex justify-center gap-2">
+                      <button onClick={() => handleEdit(exp)} className="p-2 text-gn-gold hover:bg-gn-gold/10 rounded-lg transition" title={t('Edit')}>
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => handleDelete(exp.id)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition" title={t('Delete')}>
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

@@ -63,3 +63,28 @@ def mark_as_paid(payroll_id: int, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(payroll)
     return payroll
+
+@router.delete("/{payroll_id}")
+def delete_payroll(payroll_id: int, db: Session = Depends(get_db)):
+    payroll = db.query(Payroll).filter(Payroll.id == payroll_id).first()
+    if not payroll:
+        raise HTTPException(status_code=404, detail="Payroll record not found")
+    db.delete(payroll)
+    db.commit()
+    return {"message": "Payroll record deleted"}
+
+@router.put("/{payroll_id}", response_model=PayrollResponse)
+def update_payroll(payroll_id: int, payroll_data: PayrollCreate, db: Session = Depends(get_db)):
+    payroll = db.query(Payroll).filter(Payroll.id == payroll_id).first()
+    if not payroll:
+        raise HTTPException(status_code=404, detail="Payroll record not found")
+    
+    # Recalculate net salary
+    payroll.bonuses = payroll_data.bonuses
+    payroll.deductions = payroll_data.deductions
+    payroll.overtime = payroll_data.overtime
+    payroll.net_salary = payroll.base_salary + payroll.bonuses + payroll.overtime - payroll.deductions
+    
+    db.commit()
+    db.refresh(payroll)
+    return payroll
