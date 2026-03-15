@@ -105,11 +105,11 @@ export default function Login() {
           navigate('/dashboard');
           return;
         }
-        setError(err.message || t('Connection timeout. Server might be down'));
+        setError(err.message || t('auth.connectionError'));
       } else if (err.response && err.response.data) {
-         setError(err.response.data.detail || t('Invalid username or password'));
+         setError(err.response.data.detail || t('auth.invalidCredentials'));
       } else {
-        setError(err.message || t('Invalid username or password'));
+        setError(err.message || t('auth.invalidCredentials'));
       }
     } finally {
       setLoading(false);
@@ -147,29 +147,17 @@ export default function Login() {
 
       <div className="bg-gn-surface/80 backdrop-blur-xl border border-gn-gold/20 p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          {avatarUrl || storedAvatarUrl ? (
+          {/* صورة ثابتة دائماً لـ login-hero */}
+          <div className="w-24 h-24 mx-auto mb-4 rounded-xl border border-gn-gold/30 shadow-lg overflow-hidden">
             <img
-              src={avatarUrl || storedAvatarUrl}
-              alt="User Avatar"
-              className="w-24 h-24 object-cover rounded-full mx-auto mb-4 border-2 border-gn-gold/50 shadow-lg"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.onerror = null;
-              }}
+              src="/login-hero.jpg?v=2"
+              alt="Login"
+              className="w-full h-full object-cover"
             />
-          ) : (
-            <div className="w-24 h-24 mx-auto mb-4 rounded-xl border border-gn-gold/30 shadow-lg overflow-hidden">
-              <img
-                src="/login-hero.jpg?v=2"
-                alt="Login"
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-          <h2 className="text-lg font-extrabold text-gn-gold mb-1">{t('Integrated Accountant Program')}</h2>
+          </div>
+          <h2 className="text-lg font-extrabold text-gn-gold mb-1">{t('app.fullName')}</h2>
           <p className="text-sm text-gn-goldLight">
-            {fullName ? t('Welcome, {{name}}', { name: fullName }) : t('Login')}
+            {fullName ? t('auth.welcomeName', { name: fullName }) : t('auth.login')}
           </p>
         </div>
 
@@ -181,13 +169,13 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 block text-start">{t('Username')}</label>
+            <label className="text-sm font-medium text-gray-300 block text-start">{t('auth.username')}</label>
             <div className="relative">
               <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="block w-full px-4 py-3 bg-gn-blackLight border border-gn-surface rounded-lg text-white focus:ring-1 focus:ring-gn-gold focus:border-gn-gold" required />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300 block text-start">{t('Password')}</label>
+            <label className="text-sm font-medium text-gray-300 block text-start">{t('auth.password')}</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -207,12 +195,12 @@ export default function Login() {
             </div>
           </div>
           <button type="submit" disabled={loading} className="w-full mt-8 py-3 px-4 bg-gradient-to-r from-gn-gold to-gn-goldDark hover:from-gn-goldLight hover:to-gn-gold text-gn-black font-bold text-lg rounded-lg shadow-lg hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all disabled:opacity-50">
-            {loading ? '...' : t('Login')}
+            {loading ? '...' : t('auth.login')}
           </button>
         </form>
         <div className="mt-6 text-center">
           <span className="font-semibold text-[12px] tracking-widest text-gn-goldLight italic">
-            {t('Programmed by Alsaeed Alwazzan')}
+            {t('app.copyright')}
           </span>
         </div>
       </div>

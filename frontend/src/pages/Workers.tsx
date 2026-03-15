@@ -83,12 +83,12 @@ export default function Workers() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Workers')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('workers.title')}</h2>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg"
         >
-          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Add Worker')}
+          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('workers.addWorker')}
         </button>
       </div>
 
@@ -98,7 +98,7 @@ export default function Workers() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
             <input 
               type="text" 
-              placeholder={t('Search workers...')} 
+              placeholder={t('workers.searchPlaceholder')} 
               className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gn-gold" 
             />
           </div>
@@ -108,18 +108,18 @@ export default function Workers() {
           <table className="w-full text-left">
             <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface text-center">
               <tr>
-                <th className="px-6 py-4">{t('Name')}</th>
-                <th className="px-6 py-4">{t('Nationality')}</th>
-                <th className="px-6 py-4">{t('Profession')}</th>
-                <th className="px-6 py-4">{t('Status')}</th>
-                <th className="px-6 py-4">{t('Action')}</th>
+                <th className="px-6 py-4">{t('workers.name')}</th>
+                <th className="px-6 py-4">{t('workers.nationality')}</th>
+                <th className="px-6 py-4">{t('workers.profession')}</th>
+                <th className="px-6 py-4">{t('workers.status')}</th>
+                <th className="px-6 py-4">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface text-center">
               {fetching ? (
-                <tr><td colSpan={5} className="px-6 py-8">{t('Loading')}...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8">{t('common.loading')}...</td></tr>
               ) : workers.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-gray-500">{t('No workers database rows yet. Backend fully connected!')}</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-gray-500">{t('workers.noData')}</td></tr>
               ) : (
                 workers.map((worker) => (
                   <tr key={worker.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -144,9 +144,9 @@ export default function Workers() {
                           setEditReqOpen(true);
                         }}
                         className="text-gn-gold hover:text-gn-goldLight transition flex items-center gap-1 justify-center mx-auto"
-                        title={t('Request Edit')}
+                        title={t('workers.requestEdit')}
                       >
-                        <Edit3 className="w-4 h-4" /> {t('Request Edit')}
+                        <Edit3 className="w-4 h-4" /> {t('workers.requestEdit')}
                       </button>
                       )}
                     </td>
@@ -161,28 +161,28 @@ export default function Workers() {
       <DataEntryModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Add Worker"
+        title={t('workers.addWorker')}
         onSubmit={handleSubmit}
         loading={loading}
       >
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Name')}
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.name')}
             </label>
             <input 
               type="text" 
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
               className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
-              placeholder="e.g. John Doe"
+              placeholder={t('workers.namePlaceholder')}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Globe className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Nationality')}
+                <Globe className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.nationality')}
               </label>
               <input 
                 type="text" 
@@ -204,10 +204,10 @@ export default function Workers() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Passport #')}
+                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.passport')}
               </label>
               <input 
                 type="text" 
@@ -218,7 +218,7 @@ export default function Workers() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Iqama #')}
+                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.iqama')}
               </label>
               <input 
                 type="text" 
@@ -235,7 +235,7 @@ export default function Workers() {
       <DataEntryModal
         isOpen={editReqOpen}
         onClose={() => setEditReqOpen(false)}
-        title={t('Request Edit')}
+        title={t('workers.requestEdit')}
         onSubmit={async () => {
           if (!currentWorker) return;
           const payload: any = {};
@@ -248,7 +248,7 @@ export default function Workers() {
             action: 'UPDATE',
             payload
           });
-          alert(t('Approval request sent to admin'));
+          alert(t('approvals.requestSent'));
           setEditReqOpen(false);
         }}
         loading={false}
@@ -256,7 +256,7 @@ export default function Workers() {
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Name')}
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.name')}
             </label>
             <input
               type="text"
@@ -265,7 +265,7 @@ export default function Workers() {
               className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
                 <Briefcase className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Profession')}
@@ -279,7 +279,7 @@ export default function Workers() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Salary')}
+                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('workers.salary')}
               </label>
               <input
                 type="number"

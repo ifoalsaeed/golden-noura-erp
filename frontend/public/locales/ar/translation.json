@@ -49,7 +49,9 @@
     "unauthorized": "ليس لديك الإذن لتنفيذ هذا الإجراء",
     "userNotFound": "المستخدم غير موجود",
     "rememberMe": "تذكرني",
-    "forgotPassword": "نسيت كلمة المرور"
+    "forgotPassword": "نسيت كلمة المرور",
+    "user": "مستخدم",
+    "password": "كلمة المرور"
   },
   "common": {
     "save": "حفظ",
@@ -107,7 +109,19 @@
     "discount": "الخصم",
     "currency": "العملة",
     "sar": "ريال سعودي",
-    "actions": "الإجراءات"
+    "actions": "الإجراءات",
+    "updated": "تم التحديث",
+    "to": "إلى",
+    "revenue": "الإيراد",
+    "cost": "التكلفة",
+    "margin": "الهامش",
+    "print": "طباعة",
+    "select": "اختر",
+    "serverUnreachable": "الخادم غير متاح. يرجى تشغيل الخادم الخلفي على المنفذ 8000.",
+    "checkingServer": "جاري التحقق من توفر الخادم...",
+    "exportError": "فشل في التصدير. يرجى التحقق من وحدة التحكم.",
+    "downloadPdf": "تنزيل PDF",
+    "confirmDelete": "هل أنت متأكد من الحذف؟"
   },
   "dashboard": {
     "title": "لوحة القيادة",
@@ -133,20 +147,17 @@
   "workers": {
     "title": "العمال",
     "addWorker": "إضافة عامل",
-    "editWorker": "تعديل عامل",
-    "search": "بحث عن عمال...",
+    "searchPlaceholder": "البحث في العمال...",
     "name": "الاسم",
+    "namePlaceholder": "مثال: أحمد محمد",
     "nationality": "الجنسية",
     "profession": "المهنة",
     "status": "الحالة",
-    "phone": "الهاتف",
-    "email": "البريد الإلكتروني",
-    "idNumber": "رقم الهوية",
-    "passportNumber": "رقم جواز السفر",
-    "joinDate": "تاريخ الانضمام",
+    "passport": "رقم الجواز",
+    "iqama": "رقم الإقامة",
     "salary": "الراتب",
-    "actions": "الإجراءات",
-    "noWorkers": "لا يوجد عمال في النظام",
+    "requestEdit": "طلب تعديل",
+    "noData": "لا يوجد عمال في قاعدة البيانات بعد. الباك-اند متصل!"
     "workerDetails": "تفاصيل العامل",
     "documents": "المستندات",
     "contractHistory": "تاريخ العقود",
@@ -206,7 +217,7 @@
     "contract": "العقد",
     "issueDate": "تاريخ الإصدار",
     "dueDate": "تاريخ الاستحقاق",
-    "amount": "المبلغ",
+    "amount": "المبلغ (قبل الضريبة)",
     "status": "الحالة",
     "paid": "مدفوعة",
     "unpaid": "غير مدفوعة",
@@ -224,12 +235,22 @@
     "downloadPdf": "تنزيل PDF",
     "sendEmail": "إرسال بالبريد",
     "markPaid": "تسجيل كمدفوعة",
-    "recordPayment": "تسجيل الدفع"
+    "recordPayment": "تسجيل الدفع",
+    "generateMonthly": "إنشاء فواتير شهرية",
+    "confirmPaid": "هل أنت متأكد من تسجيل الفاتورة كمدفوعة؟ سيؤدي هذا إلى تسجيل إيصال في الأستاذ العام.",
+    "confirmDelete": "طلب موافقة لحذف هذه الفاتورة؟",
+    "confirmGenerateBulk": "إنشاء فواتير لجميع العقود النشطة؟",
+    "createError": "فشل في إنشاء الفاتورة",
+    "updateError": "فشل في تحديث حالة الفاتورة",
+    "sendApprovalError": "فشل في إرسال طلب الموافقة",
+    "vatNote": "سيتم إضافة ضريبة القيمة المضافة (15%) تلقائياً. الإجمالي:"
   },
   "payroll": {
     "title": "الرواتب",
     "processPayroll": "معالجة الرواتب",
     "selectWorker": "اختر العامل",
+    "worker": "العامل",
+    "period": "الفترة",
     "month": "الشهر",
     "year": "السنة",
     "basicSalary": "الراتب الأساسي",
@@ -268,7 +289,8 @@
       "office": "مستلزمات مكتبية",
       "other": "أخرى"
     },
-    "expenseReport": "تقرير المصروفات"
+    "expenseReport": "تقرير المصروفات",
+    "enterDetails": "أدخل التفاصيل..."
   },
   "accounting": {
     "title": "المحاسبة",
@@ -295,7 +317,26 @@
     "equity": "حقوق الملكية",
     "revenue": "الإيرادات",
     "expenses": "المصروفات",
-    "retainedEarnings": "الأرباح المحتجزة"
+    "retainedEarnings": "الأرباح المحتجزة",
+    "balanceSheetPdf": "الميزانية العمومية PDF",
+    "latestEntries": "آخر القيود المحاسبية",
+    "newEntry": "قيد جديد",
+    "date": "التاريخ",
+    "description": "البيان / الوصف",
+    "accountRef": "مرجع الحساب",
+    "debit": "مدين (-)",
+    "credit": "دائن (+)",
+    "printStatement": "طباعة الكشف",
+    "exportExcel": "تصدير Excel",
+    "generatingStatement": "جاري إنشاء الكشف...",
+    "totalAssets": "إجمالي الأصول",
+    "totalLiabilities": "إجمالي الالتزامات",
+    "totalEquity": "إجمالي حقوق الملكية",
+    "totalLiabilitiesEquity": "إجمالي الالتزامات وحقوق الملكية",
+    "noDataForYear": "لا توجد بيانات متاحة لهذا العام",
+    "confidentialStatement": "كشف سري",
+    "generatedBy": "تم إنشاؤه بواسطة Golden Noura ERP",
+    "openInNewTab": "فتح في علامة تبويب جديدة"
   },
   "reports": {
     "title": "التقارير",
@@ -389,7 +430,11 @@
     "crNumber": "رقم السجل التجاري",
     "logo": "الشعار",
     "uploadLogo": "رفع الشعار",
-    "saveChanges": "حفظ التغييرات"
+    "saveChanges": "حفظ التغييرات",
+    "avatar": "الصورة الشخصية",
+    "uploadAvatar": "رفع الصورة الشخصية",
+    "avatarUpdated": "تم تحديث الصورة الشخصية بنجاح",
+    "avatarUploadError": "فشل في رفع الصورة الشخصية"
   },
   "rbac": {
     "title": "إدارة الصلاحيات",
@@ -429,7 +474,11 @@
     "requestedAt": "تاريخ الطلب",
     "approve": "موافقة",
     "reject": "رفض",
-    "requestSent": "تم إرسال الطلب إلى المدير"
+    "requestSent": "تم إرسال الطلب إلى المدير",
+    "table": "الجدول",
+    "record": "السجل",
+    "payload": "البيانات",
+    "decision": "القرار"
   },
   "notifications": {
     "success": "تم بنجاح",

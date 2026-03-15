@@ -37,7 +37,7 @@ export default function Approvals() {
       fetchPending();
     } catch (e) {
       console.error(e);
-      alert('Action failed');
+      alert(t('common.error'));
     }
   };
 
@@ -45,24 +45,24 @@ export default function Approvals() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Shield className="w-7 h-7 text-gn-gold" />
-        <h2 className="text-2xl font-bold text-white">{t('Approvals')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('approvals.title')}</h2>
       </div>
       <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-6">
-        {loading ? <div className="text-gray-400">{t('Loading')}...</div> : (
+        {loading ? <div className="text-gray-400">{t('common.loading')}...</div> : (
           <table className="w-full text-center text-gray-300">
             <thead className="text-xs uppercase text-gn-goldLight">
               <tr>
                 <th className="py-3">ID</th>
-                <th className="py-3">{t('Table')}</th>
-                <th className="py-3">{t('Record')}</th>
-                <th className="py-3">{t('Action')}</th>
-                <th className="py-3">{t('Payload')}</th>
-                <th className="py-3">{t('Decision')}</th>
+                <th className="py-3">{t('approvals.table')}</th>
+                <th className="py-3">{t('approvals.record')}</th>
+                <th className="py-3">{t('approvals.action')}</th>
+                <th className="py-3">{t('approvals.payload')}</th>
+                <th className="py-3">{t('approvals.decision')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface">
               {items.length === 0 ? (
-                <tr><td colSpan={6} className="py-6 text-gray-500">{t('No data available')}</td></tr>
+                <tr><td colSpan={6} className="py-6 text-gray-500">{t('common.noData')}</td></tr>
               ) : items.map(it => (
                 <tr key={it.id}>
                   <td className="py-3">{it.id}</td>

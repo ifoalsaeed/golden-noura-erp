@@ -64,7 +64,7 @@ export default function Payroll() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t('Are you sure?'))) return;
+    if (!window.confirm(t('common.confirmDelete'))) return;
     try {
       const resp = await fetch(`${API_URL}/api/v1/payroll/${id}`, { method: 'DELETE' });
       if (resp.ok) {
@@ -137,11 +137,12 @@ export default function Payroll() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Payroll')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('payroll.title')}</h2>
         <div className="flex gap-4">
           <button 
             onClick={fetchData}
             className="p-2 bg-gn-surface border border-gn-surface rounded-lg text-gray-400 hover:text-gn-gold transition"
+            title={t('common.refresh')}
           >
             <RefreshCw className="w-5 h-5" />
           </button>
@@ -149,7 +150,7 @@ export default function Payroll() {
             onClick={() => setIsModalOpen(true)}
             className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg"
           >
-            <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Process Payroll')}
+            <Plus className="w-5 h-5 mr-2 ml-2" /> {t('payroll.processPayroll')}
           </button>
         </div>
       </div>
@@ -159,18 +160,18 @@ export default function Payroll() {
           <table className="w-full text-left text-gray-300">
             <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface">
               <tr>
-                <th className="px-6 py-4">{t('Worker')}</th>
-                <th className="px-6 py-4">{t('Period')}</th>
-                <th className="px-6 py-4">{t('Net Salary')}</th>
-                <th className="px-6 py-4">{t('Status')}</th>
-                <th className="px-6 py-4">{t('Action')}</th>
+                <th className="px-6 py-4">{t('workers.title')}</th>
+                <th className="px-6 py-4">{t('payroll.period')}</th>
+                <th className="px-6 py-4">{t('payroll.netSalary')}</th>
+                <th className="px-6 py-4">{t('workers.status')}</th>
+                <th className="px-6 py-4">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface">
               {fetching ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('Loading')}...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('common.loading')}...</td></tr>
               ) : records.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('No data available')}</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('common.noData')}</td></tr>
               ) : (
                 records.map((rec) => (
                   <tr key={rec.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -187,11 +188,11 @@ export default function Payroll() {
                     <td className="px-6 py-4 text-sm">
                       {rec.is_paid ? (
                         <span className="flex items-center text-green-400">
-                          <CheckCircle className="w-4 h-4 mr-1 ml-1" /> {t('Paid')}
+                          <CheckCircle className="w-4 h-4 mr-1 ml-1" /> {t('payroll.paid')}
                         </span>
                       ) : (
                         <span className="flex items-center text-yellow-500">
-                          <Clock className="w-4 h-4 mr-1 ml-1" /> {t('Processing')}
+                          <Clock className="w-4 h-4 mr-1 ml-1" /> {t('payroll.processing')}
                         </span>
                       )}
                     </td>
@@ -202,12 +203,12 @@ export default function Payroll() {
                             onClick={() => handleMarkAsPaid(rec.id)}
                             className="px-3 py-1 bg-green-500/10 text-green-400 hover:bg-green-500/20 text-xs font-bold rounded-lg transition border border-green-500/20"
                           >
-                            {t('Mark as Paid')}
+                            {t('payroll.markAsPaid')}
                           </button>
                           <button 
                             onClick={() => handleEdit(rec)}
                             className="p-2 text-gn-gold hover:bg-gn-gold/10 rounded-lg transition" 
-                            title={t('Edit')}
+                            title={t('common.edit')}
                           >
                             <Edit className="w-5 h-5" />
                           </button>
@@ -216,7 +217,7 @@ export default function Payroll() {
                       <button 
                         onClick={() => handleDelete(rec.id)}
                         className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition" 
-                        title={t('Delete')}
+                        title={t('common.delete')}
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -232,14 +233,14 @@ export default function Payroll() {
       <DataEntryModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Process Payroll"
+        title={t('payroll.processPayroll')}
         onSubmit={handleSubmit}
         loading={loading}
       >
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Worker')}
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('payroll.selectWorker')}
             </label>
             <select 
               value={formData.worker_id}
@@ -247,7 +248,7 @@ export default function Payroll() {
               className="w-full bg-gn-blackLight border border-gn-surface rounded-lg px-4 py-3 text-white focus:border-gn-gold outline-none"
               required
             >
-              <option value="">{t('Select Worker')}</option>
+              <option value="">{t('common.select')} {t('payroll.worker')}</option>
               {workers.map(w => (
                 <option key={w.id} value={w.id}>{w.name} ({w.profession})</option>
               ))}
@@ -257,7 +258,7 @@ export default function Payroll() {
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Month')}
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('payroll.month')}
               </label>
               <input 
                 type="number" min="1" max="12"
@@ -268,7 +269,7 @@ export default function Payroll() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Year')}
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('payroll.year')}
               </label>
               <input 
                 type="number"
@@ -282,7 +283,7 @@ export default function Payroll() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Plus className="w-4 h-4 mr-2 ml-2 text-green-400" /> {t('Bonuses')}
+                <Plus className="w-4 h-4 mr-2 ml-2 text-green-400" /> {t('payroll.bonuses')}
               </label>
               <input 
                 type="number"
@@ -293,7 +294,7 @@ export default function Payroll() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Plus className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Overtime')}
+                <Plus className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('payroll.overtime')}
               </label>
               <input 
                 type="number"
@@ -304,7 +305,7 @@ export default function Payroll() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Plus className="w-4 h-4 mr-2 ml-2 text-red-400" /> {t('Deductions')}
+                <Plus className="w-4 h-4 mr-2 ml-2 text-red-400" /> {t('payroll.deductions')}
               </label>
               <input 
                 type="number"

@@ -49,7 +49,9 @@
     "unauthorized": "আপনার এই কাজ করার অনুমতি নেই",
     "userNotFound": "ব্যবহারকারী পাওয়া যায়নি",
     "rememberMe": "আমাকে মনে রাখুন",
-    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন"
+    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন",
+    "user": "ব্যবহারকারী",
+    "password": "পাসওয়ার্ড"
   },
   "common": {
     "save": "সংরক্ষণ",
@@ -107,7 +109,19 @@
     "discount": "ছাড়",
     "currency": "মুদ্রা",
     "sar": "সৌদি রিয়াল",
-    "actions": "ক্রিয়াকলাপ"
+    "actions": "ক্রিয়াকলাপ",
+    "updated": "আপডেট করা হয়েছে",
+    "to": "থেকে",
+    "revenue": "আয়",
+    "cost": "খরচ",
+    "margin": "মার্জিন",
+    "print": "প্রিন্ট",
+    "select": "নির্বাচন করুন",
+    "serverUnreachable": "সার্ভার অ্যাক্সেসযোগ্য নয়। দয়া করে পোর্ট 8000-এ ব্যাকএন্ড সার্ভার চালু করুন।",
+    "checkingServer": "সার্ভার উপলব্ধতা যাচাই করা হচ্ছে...",
+    "exportError": "এক্সপোর্ট ব্যর্থ হয়েছে। কনসোল চেক করুন।",
+    "downloadPdf": "PDF ডাউনলোড করুন",
+    "confirmDelete": "আপনি কি মুছে ফেলার বিষয়ে নিশ্চিত?"
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড",
@@ -133,24 +147,17 @@
   "workers": {
     "title": "কর্মী",
     "addWorker": "কর্মী যোগ করুন",
-    "editWorker": "কর্মী সম্পাদনা করুন",
-    "search": "কর্মী খুঁজুন...",
+    "searchPlaceholder": "কর্মী খুঁজুন...",
     "name": "নাম",
+    "namePlaceholder": "যেমন: আহমেদ মোহাম্মদ",
     "nationality": "জাতীয়তা",
     "profession": "পেশা",
     "status": "অবস্থা",
-    "phone": "ফোন",
-    "email": "ইমেইল",
-    "idNumber": "আইডি নম্বর",
-    "passportNumber": "পাসপোর্ট নম্বর",
-    "joinDate": "যোগদানের তারিখ",
+    "passport": "পাসপোর্ট নম্বর",
+    "iqama": "ইকামা নম্বর",
     "salary": "বেতন",
-    "actions": "ক্রিয়াকলাপ",
-    "noWorkers": "সিস্টেমে কোনো কর্মী নেই",
-    "workerDetails": "কর্মীর বিবরণ",
-    "documents": "নথিপত্র",
-    "contractHistory": "চুক্তির ইতিহাস",
-    "performance": "কর্মক্ষমতা"
+    "requestEdit": "সম্পাদনার অনুরোধ",
+    "noData": "এখনো কোনো কর্মী নেই. ব্যাকএন্ড সংযুক্ত!"
   },
   "clients": {
     "title": "ক্লায়েন্ট",
@@ -224,12 +231,22 @@
     "downloadPdf": "PDF ডাউনলোড করুন",
     "sendEmail": "ইমেইল পাঠান",
     "markPaid": "পরিশোধিত হিসাবে চিহ্নিত করুন",
-    "recordPayment": "পেমেন্ট রেকর্ড করুন"
+    "recordPayment": "পেমেন্ট রেকর্ড করুন",
+    "generateMonthly": "মাসিক চালান তৈরি করুন",
+    "confirmPaid": "আপনি কি এই ইনভয়েসটি পরিশোধিত হিসাবে চিহ্নিত করতে নিশ্চিত? এটি সাধারণ লেজারে একটি রসিদ রেকর্ড করবে।",
+    "confirmDelete": "এই ইনভয়েসটি মুছে ফেলার অনুমোদনের জন্য অনুরোধ করবেন?",
+    "confirmGenerateBulk": "সক্রিয় চুক্তিগুলির জন্য ইনভয়েস তৈরি করবেন?",
+    "createError": "ইনভয়েস তৈরি করতে ব্যর্থ",
+    "updateError": "ইনভয়েসের অবস্থা আপডেট করতে ব্যর্থ",
+    "sendApprovalError": "অনুমোদনের অনুরোধ পাঠাতে ব্যর্থ",
+    "vatNote": "ভ্যাট (১৫%) স্বয়ংক্রিয়ভাবে যোগ করা হবে। মোট:"
   },
   "payroll": {
     "title": "বেতন",
     "processPayroll": "বেতন প্রক্রিয়া করুন",
     "selectWorker": "কর্মী নির্বাচন করুন",
+    "worker": "কর্মী",
+    "period": "সময়কাল",
     "month": "মাস",
     "year": "বছর",
     "basicSalary": "মৌলিক বেতন",
@@ -268,7 +285,8 @@
       "office": "দপ্তর সরবরাহ",
       "other": "অন্যান্য"
     },
-    "expenseReport": "খরচের রিপোর্ট"
+    "expenseReport": "খরচের রিপোর্ট",
+    "enterDetails": "বিস্তারিত তথ্য লিখুন..."
   },
   "accounting": {
     "title": "হিসাবরক্ষণ",
@@ -295,7 +313,26 @@
     "equity": "ইক্যুইটি",
     "revenue": "রাজস্ব",
     "expenses": "ব্যয়",
-    "retainedEarnings": "ধারিত আয়"
+    "retainedEarnings": "ধারিত আয়",
+    "balanceSheetPdf": "ব্যালেন্স শিট PDF",
+    "latestEntries": "সর্বশেষ জার্নাল এন্ট্রি",
+    "newEntry": "নতুন এন্ট্রি",
+    "date": "তারিখ",
+    "description": "বিবরণ / বিবরণ",
+    "accountRef": "অ্যাকাউন্ট রেফারেন্স",
+    "debit": "ডেবিট (-)",
+    "credit": "ক্রেডিট (+)",
+    "printStatement": "স্টেটমেন্ট প্রিন্ট করুন",
+    "exportExcel": "এক্সপোর্ট Excel",
+    "generatingStatement": "স্টেটমেন্ট তৈরি হচ্ছে...",
+    "totalAssets": "মোট সম্পদ",
+    "totalLiabilities": "মোট দায়বদ্ধতা",
+    "totalEquity": "মোট ইক্যুইটি",
+    "totalLiabilitiesEquity": "মোট দায়বদ্ধতা ও ইক্যুইটি",
+    "noDataForYear": "এই বছরের জন্য কোনো ডেটা উপলব্ধ নেই",
+    "confidentialStatement": "গোপনীয় স্টেটমেন্ট",
+    "generatedBy": "Golden Noura ERP দ্বারা তৈরি",
+    "openInNewTab": "নতুন ট্যাবে খুলুন"
   },
   "reports": {
     "title": "রিপোর্ট",
@@ -330,7 +367,8 @@
     "asOf": "হিসাবে",
     "generatedAt": "তৈরি করা হয়েছে",
     "generatedBy": "তৈরি করেছেন",
-    "printReport": "রিপোর্ট প্রিন্ট করুন"
+    "printReport": "রিপোর্ট প্রিন্ট করুন",
+    "revenueDistribution": "আয় বিতরণ"
   },
   "print": {
     "invoiceTitle": "ইনভয়েস",
@@ -389,7 +427,11 @@
     "crNumber": "বাণিজ্য নিবন্ধন নম্বর",
     "logo": "লোগো",
     "uploadLogo": "লোগো আপলোড করুন",
-    "saveChanges": "পরিবর্তন সংরক্ষণ করুন"
+    "avatar": "অবতার",
+    "uploadAvatar": "অবতার আপলোড করুন",
+    "avatarUpdated": "অবতার সফলভাবে আপডেট হয়েছে",
+    "avatarUploadError": "অবতার আপলোড করতে ব্যর্থ",
+    "saveChanges": "পরিবর্তনগুলি সংরক্ষণ করুন"
   },
   "rbac": {
     "title": "অনুমতি ব্যবস্থাপনা",
@@ -429,7 +471,11 @@
     "requestedAt": "অনুরোধের সময়",
     "approve": "অনুমোদন",
     "reject": "প্রত্যাখ্যান",
-    "requestSent": "অনুরোধটি অ্যাডমিনের কাছে পাঠানো হয়েছে"
+    "requestSent": "অনুরোধটি অ্যাডমিনের কাছে পাঠানো হয়েছে",
+    "table": "টেবিল",
+    "record": "রেকর্ড",
+    "payload": "পেলোড",
+    "decision": "সিদ্ধান্ত"
   },
   "notifications": {
     "success": "সফল",

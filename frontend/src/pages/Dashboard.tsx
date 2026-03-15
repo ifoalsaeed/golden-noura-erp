@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import api, { getApiBaseUrl } from '../api';
 import { 
   Users, 
@@ -166,28 +167,28 @@ export default function Dashboard() {
 
   const statCards = [
     { 
-      label: 'Total Workers', 
+      labelKey: 'dashboard.stats.totalWorkers', 
       value: stats.workers, 
       icon: Users, 
       color: 'text-blue-400',
       bg: 'bg-blue-500/10' 
     },
     { 
-      label: 'Active Workers', 
+      labelKey: 'dashboard.stats.activeWorkers', 
       value: stats.activeWorkers, 
       icon: Activity, 
       color: 'text-green-400',
       bg: 'bg-green-500/10' 
     },
     { 
-      label: 'Monthly Revenue', 
+      labelKey: 'dashboard.stats.monthlyRevenue', 
       value: `SAR ${stats.revenue.toLocaleString()}`, 
       icon: DollarSign, 
       color: 'text-gn-gold',
       bg: 'bg-gn-gold/10' 
     },
     { 
-      label: 'Net Profit', 
+      labelKey: 'dashboard.stats.netProfit', 
       value: `SAR ${stats.netProfit.toLocaleString()}`, 
       icon: TrendingUp, 
       color: 'text-purple-400',
@@ -203,7 +204,7 @@ export default function Dashboard() {
             <UserAvatar size="lg" />
             <div>
               <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                {t('Welcome, {{name}}', { name: (fullName?.trim() || localStorage.getItem('full_name') || localStorage.getItem('username') || t('User')) })}
+                {t('auth.welcomeName', { name: (fullName?.trim() || localStorage.getItem('full_name') || localStorage.getItem('username') || t('common.name')) })}
               </h1>
               {role && (
                 <span className="inline-block mt-2 px-3 py-1 text-sm bg-gn-gold/20 text-gn-gold rounded-md border border-gn-gold/30">
@@ -212,14 +213,14 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-          <p className="text-gray-400 mt-4 font-medium">{t('Here is what is happening with Golden Noura ERP today.')}</p>
+          <p className="text-gray-400 mt-4 font-medium">{t('dashboard.happeningToday')}</p>
           <p className="text-sm text-gn-goldLight mt-2">
-            {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            {new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'bn' ? 'bn-BD' : 'en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
         <div className="flex items-center gap-3 bg-gn-surface border border-gn-surface px-6 py-3 rounded-2xl text-sm text-gray-300 shadow-lg">
           <Calendar className="w-5 h-5 text-gn-gold" />
-          <span className="font-semibold">{new Date().toLocaleDateString('ar-SA')}</span>
+          <span className="font-semibold">{new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-SA' : i18n.language === 'bn' ? 'bn-BD' : 'en-US')}</span>
         </div>
       </header>
 
@@ -233,7 +234,7 @@ export default function Dashboard() {
               </div>
               <TrendingUp className="w-4 h-4 text-green-400" />
             </div>
-            <p className="text-gray-400 text-sm font-medium relative z-10">{t(card.label)}</p>
+            <p className="text-gray-400 text-sm font-medium relative z-10">{t(card.labelKey)}</p>
             <h3 className="text-2xl font-bold text-white mt-1 relative z-10">{loading ? '...' : card.value}</h3>
           </div>
         ))}
@@ -244,11 +245,11 @@ export default function Dashboard() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gn-gold/0 via-gn-gold/50 to-gn-gold/0"></div>
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Activity className="w-5 h-5 text-gn-gold" /> {t('Financial Performance')}
+              <Activity className="w-5 h-5 text-gn-gold" /> {t('dashboard.financialPerformance')}
             </h2>
             <select className="bg-gn-blackLight border border-gn-surface text-gray-400 text-xs px-3 py-1 rounded-lg outline-none focus:border-gn-gold">
-              <option>Last 30 Days</option>
-              <option>Last 90 Days</option>
+              <option>{t('common.date', { days: 30 })}</option>
+              <option>{t('common.date', { days: 90 })}</option>
             </select>
           </div>
           <div className="h-full pb-12">
@@ -283,7 +284,7 @@ export default function Dashboard() {
 
         <div className="bg-gn-surface/40 border border-gn-surface p-8 rounded-3xl shadow-2xl">
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-gn-gold" /> {t('Recent Activity')}
+            <FileText className="w-5 h-5 text-gn-gold" /> {t('dashboard.recentActivity')}
           </h2>
           <div className="space-y-6">
             {[1, 2, 3, 4].map((_, i) => (
@@ -292,14 +293,14 @@ export default function Dashboard() {
                   <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gn-gold" />
                 </div>
                 <div className="border-b border-gn-surface pb-4 w-full group-hover:border-gn-gold/20 transition-colors">
-                  <p className="text-sm font-medium text-white">{t('Contract #')} CON-9283{i}</p>
-                  <p className="text-xs text-gray-500 mt-1">2 hours ago • {t('Updated')}</p>
+                  <p className="text-sm font-medium text-white">{t('contracts.contractNumber')}: CON-9283{i}</p>
+                  <p className="text-xs text-gray-500 mt-1">{t('common.updated')}</p>
                 </div>
               </div>
             ))}
           </div>
           <button className="w-full mt-6 py-3 bg-gn-blackLight border border-gn-surface hover:border-gn-gold/50 text-white rounded-xl text-sm font-medium transition-all">
-            {t('View All Activity')}
+            {t('dashboard.viewAll')}
           </button>
         </div>
       </div>

@@ -71,12 +71,12 @@ export default function Clients() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Clients')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('clients.title')}</h2>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg"
         >
-          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Add Client')}
+          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('clients.addClient')}
         </button>
       </div>
 
@@ -86,7 +86,7 @@ export default function Clients() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
             <input 
               type="text" 
-              placeholder={t('Search clients...')} 
+              placeholder={t('clients.search')} 
               className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gn-gold" 
             />
           </div>
@@ -96,17 +96,17 @@ export default function Clients() {
           <table className="w-full text-left">
             <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface text-center">
               <tr>
-                <th className="px-6 py-4">{t('Company Name')}</th>
-                <th className="px-6 py-4">{t('Contact Person')}</th>
-                <th className="px-6 py-4">{t('Phone')}</th>
-                <th className="px-6 py-4">{t('Action')}</th>
+                <th className="px-6 py-4">{t('clients.companyName')}</th>
+                <th className="px-6 py-4">{t('clients.contactPerson')}</th>
+                <th className="px-6 py-4">{t('clients.phone')}</th>
+                <th className="px-6 py-4">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface text-center">
               {fetching ? (
-                <tr><td colSpan={4} className="px-6 py-8">{t('Loading')}...</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8">{t('common.loading')}...</td></tr>
               ) : clients.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-8 text-gray-500">{t('No clients added yet.')}</td></tr>
+                <tr><td colSpan={4} className="px-6 py-8 text-gray-500">{t('clients.noClients')}</td></tr>
               ) : (
                 clients.map((client) => (
                   <tr key={client.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -127,14 +127,14 @@ export default function Clients() {
       <DataEntryModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Add Client"
+        title={t('clients.addClient')}
         onSubmit={handleSubmit}
         loading={loading}
       >
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <Building2 className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Company Name')}
+              <Building2 className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.companyName')}
             </label>
             <input 
               type="text" 
@@ -144,10 +144,10 @@ export default function Clients() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Plus className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Contact Person')}
+                <Plus className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.contactPerson')}
               </label>
               <input 
                 type="text" 
@@ -158,7 +158,7 @@ export default function Clients() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Phone className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Phone')}
+                <Phone className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.phone')}
               </label>
               <input 
                 type="text" 
@@ -171,7 +171,7 @@ export default function Clients() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <Mail className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Email')}
+              <Mail className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.email')}
             </label>
             <input 
               type="email" 
@@ -183,7 +183,7 @@ export default function Clients() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <MapPin className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Address')}
+              <MapPin className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.address')}
             </label>
             <input 
               type="text" 
@@ -211,28 +211,28 @@ function RequestEditButton({ client }: { client: Client }) {
       <button
         onClick={() => setOpen(true)}
         className="text-gn-gold hover:text-gn-goldLight transition flex items-center gap-1 justify-center mx-auto"
-        title={t('Request Edit')}
+        title={t('workers.requestEdit')}
       >
-        <Edit3 className="w-4 h-4" /> {t('Request Edit')}
+        <Edit3 className="w-4 h-4" /> {t('workers.requestEdit')}
       </button>
       <DataEntryModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        title={t('Request Edit')}
+        title={t('workers.requestEdit')}
         onSubmit={async () => {
           const payload: any = {};
           if (form.company_name && form.company_name !== client.company_name) payload.company_name = form.company_name;
           if (form.phone && form.phone !== (client as any).phone) payload.phone = form.phone;
           if (form.email) payload.email = form.email;
           await requestApproval({ target_table: 'clients', target_id: client.id, action: 'UPDATE', payload });
-          alert(t('Approval request sent to admin'));
+          alert(t('approvals.requestSent'));
           setOpen(false);
         }}
         loading={false}
       >
         <div className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-400">{t('Company Name')}</label>
+            <label className="text-sm font-medium text-gray-400">{t('clients.companyName')}</label>
             <input
               type="text"
               value={form.company_name}
@@ -240,9 +240,9 @@ function RequestEditButton({ client }: { client: Client }) {
               className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 flex items-center"><Phone className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Phone')}</label>
+              <label className="text-sm font-medium text-gray-400 flex items-center"><Phone className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.phone')}</label>
               <input
                 type="text"
                 value={form.phone}
@@ -251,7 +251,7 @@ function RequestEditButton({ client }: { client: Client }) {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 flex items-center"><Mail className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Email')}</label>
+              <label className="text-sm font-medium text-gray-400 flex items-center"><Mail className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('clients.email')}</label>
               <input
                 type="email"
                 value={form.email}
@@ -261,7 +261,7 @@ function RequestEditButton({ client }: { client: Client }) {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-400">{t('Reason')}</label>
+            <label className="text-sm font-medium text-gray-400">{t('approvals.reason')}</label>
             <textarea
               className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none h-20"
               placeholder=""

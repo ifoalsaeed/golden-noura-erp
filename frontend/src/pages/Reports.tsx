@@ -45,7 +45,7 @@ export default function Reports() {
       document.body.removeChild(a);
     } catch (err) {
       console.error(err);
-      alert('Export failed. Please check the console.');
+      alert(t('common.exportError'));
     } finally {
       setExporting(null);
     }
@@ -90,15 +90,15 @@ export default function Reports() {
   const renderOverview = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <SummaryCard title="Revenue" amount={data.revenue} icon={<TrendingUp className="w-8 h-8 text-gn-gold" />} trend="+12%" color="gold" />
-        <SummaryCard title="Expenses" amount={data.expenses} icon={<TrendingDown className="w-8 h-8 text-red-500" />} trend="+5%" color="red" />
-        <SummaryCard title="Net Profit" amount={data.profit} icon={<TrendingUp className="w-8 h-8 text-green-500" />} trend="+8%" color="green" />
+        <SummaryCard title={t('reports.totalRevenue')} amount={data.revenue} icon={<TrendingUp className="w-8 h-8 text-gn-gold" />} trend="+12%" color="gold" />
+        <SummaryCard title={t('reports.totalExpenses')} amount={data.expenses} icon={<TrendingDown className="w-8 h-8 text-red-500" />} trend="+5%" color="red" />
+        <SummaryCard title={t('reports.netProfit')} amount={data.profit} icon={<TrendingUp className="w-8 h-8 text-green-500" />} trend="+8%" color="green" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl h-[400px]">
           <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-             <BarChart3 className="w-5 h-5 text-gn-gold" /> {t('Revenue vs Expenses')}
+             <BarChart3 className="w-5 h-5 text-gn-gold" /> {t('reports.revenueVsExpenses')}
           </h4>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data.timeline}>
@@ -124,7 +124,7 @@ export default function Reports() {
 
         <div className="bg-gn-surface/50 border border-gn-surface p-6 rounded-2xl h-[400px]">
           <h4 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-             <PieChart className="w-5 h-5 text-gn-gold" /> {t('Revenue Distribution')}
+             <PieChart className="w-5 h-5 text-gn-gold" /> {t('reports.revenueDistribution')}
           </h4>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data.timeline}>
@@ -151,7 +151,7 @@ export default function Reports() {
                 onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
                 className="bg-gn-blackLight border border-gn-surface text-white px-4 py-2 rounded-lg"
             />
-            <span className="text-white self-center">to</span>
+            <span className="text-white self-center">{t('common.to')}</span>
             <input 
                 type="date" 
                 value={dateRange.endDate}
@@ -162,18 +162,18 @@ export default function Reports() {
         <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-8 overflow-hidden">
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h3 className="text-2xl font-bold text-white">{t('Profit & Loss Statement')}</h3>
-              <p className="text-gray-400 text-sm mt-1">{t('Period')}: {dateRange.startDate} - {dateRange.endDate}</p>
+              <h3 className="text-2xl font-bold text-white">{t('reports.profitLoss')}</h3>
+              <p className="text-gray-400 text-sm mt-1">{t('reports.period')}: {dateRange.startDate} - {dateRange.endDate}</p>
             </div>
             <div className={`px-6 py-2 rounded-full font-bold text-lg ${data.pl.net_profit >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-              {t('Net Profit')}: SAR {data.pl.net_profit.toLocaleString()}
+              {t('reports.netProfit')}: SAR {data.pl.net_profit.toLocaleString()}
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <section className="space-y-4">
               <h4 className="text-gn-gold font-bold flex items-center gap-2 border-b border-gn-surface pb-2">
-                <TrendingUp className="w-5 h-5" /> {t('Revenue')}
+                <TrendingUp className="w-5 h-5" /> {t('accounting.revenue')}
               </h4>
               <div className="space-y-3">
                 {data.pl.revenue_items.map((item: any, i: number) => (
@@ -183,7 +183,7 @@ export default function Reports() {
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-4 border-t border-gn-surface font-bold text-white">
-                  <span>{t('Total Revenue')}</span>
+                  <span>{t('accounting.totalRevenue')}</span>
                   <span>SAR {data.pl.total_revenue.toLocaleString()}</span>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function Reports() {
 
             <section className="space-y-4">
               <h4 className="text-red-400 font-bold flex items-center gap-2 border-b border-gn-surface pb-2">
-                <TrendingDown className="w-5 h-5" /> {t('Expenses')}
+                <TrendingDown className="w-5 h-5" /> {t('accounting.expenses')}
               </h4>
               <div className="space-y-3">
                 {data.pl.expense_items.map((item: any, i: number) => (
@@ -201,7 +201,7 @@ export default function Reports() {
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-4 border-t border-gn-surface font-bold text-white">
-                  <span>{t('Total Expenses')}</span>
+                  <span>{t('reports.totalExpenses')}</span>
                   <span>SAR {data.pl.total_expenses.toLocaleString()}</span>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function Reports() {
     return (
       <div className="space-y-6 animate-in slide-in-from-left duration-500">
         <div className="flex justify-end gap-4 mb-4">
-            <span className="text-white self-center">{t('As of')}:</span>
+            <span className="text-white self-center">{t('reports.asOf')}:</span>
             <input 
                 type="date" 
                 value={dateRange.endDate}
@@ -229,7 +229,7 @@ export default function Reports() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <Scale className="w-6 h-6 text-gn-gold" /> {t('Assets')}
+                <Scale className="w-6 h-6 text-gn-gold" /> {t('accounting.assets')}
             </h3>
             <div className="space-y-4">
                 {assets.accounts.map((item: any, i: number) => (
@@ -239,7 +239,7 @@ export default function Reports() {
                 </div>
                 ))}
                 <div className="flex justify-between p-4 bg-gn-gold/10 border border-gn-gold/20 rounded-xl font-bold text-white mt-8">
-                <span>{t('Total Assets')}</span>
+                <span>{t('accounting.totalAssets')}</span>
                 <span>SAR {assets.total.toLocaleString()}</span>
                 </div>
             </div>
@@ -248,7 +248,7 @@ export default function Reports() {
             <div className="space-y-6">
             <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <Receipt className="w-6 h-6 text-red-400" /> {t('Liabilities')}
+                <Receipt className="w-6 h-6 text-red-400" /> {t('accounting.liabilities')}
                 </h3>
                 <div className="space-y-4">
                 {liabilities.accounts.map((item: any, i: number) => (
@@ -258,7 +258,7 @@ export default function Reports() {
                     </div>
                 ))}
                 <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
-                    <span>{t('Total Liabilities')}</span>
+                    <span>{t('accounting.totalLiabilities')}</span>
                     <span>SAR {liabilities.total.toLocaleString()}</span>
                 </div>
                 </div>
@@ -266,7 +266,7 @@ export default function Reports() {
 
             <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                <MoveRight className="w-6 h-6 text-green-400" /> {t('Equity')}
+                <MoveRight className="w-6 h-6 text-green-400" /> {t('accounting.equity')}
                 </h3>
                 <div className="space-y-4">
                 {equity.accounts.map((item: any, i: number) => (
@@ -278,12 +278,12 @@ export default function Reports() {
                 
                 {/* Explicit Retained Earnings Display */}
                 <div className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg border-l-2 border-green-500">
-                    <span className="text-gray-300">{t('Retained Earnings')}</span>
+                    <span className="text-gray-300">{t('accounting.retainedEarnings')}</span>
                     <span className="text-white font-bold">SAR {equity.retained_earnings.toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
-                    <span>{t('Total Equity')}</span>
+                    <span>{t('accounting.totalEquity')}</span>
                     <span>SAR {equity.total.toLocaleString()}</span>
                 </div>
                 </div>
@@ -303,15 +303,15 @@ export default function Reports() {
              <DollarSign className="w-8 h-8 text-gn-gold" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-white">{t('Cash Flow Analysis')}</h3>
-            <p className="text-gray-400 text-sm">{t('Tracking cash movement in and out')}</p>
+            <h3 className="text-2xl font-bold text-white">{t('reports.cashFlow')}</h3>
+            <p className="text-gray-400 text-sm">{t('reports.trackingCash')}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
            <div className="space-y-6">
               <h4 className="text-green-400 font-bold flex items-center gap-2">
-                <ArrowUpRight className="w-5 h-5" /> {t('Cash Inflows')}
+                <ArrowUpRight className="w-5 h-5" /> {t('reports.cashInflows')}
               </h4>
               <div className="space-y-4">
                 {data.cashflow.inflow.map((item: any, i: number) => (
@@ -325,7 +325,7 @@ export default function Reports() {
 
            <div className="space-y-6">
               <h4 className="text-red-400 font-bold flex items-center gap-2">
-                <ArrowDownRight className="w-5 h-5" /> {t('Cash Outflows')}
+                <ArrowDownRight className="w-5 h-5" /> {t('reports.cashOutflows')}
               </h4>
               <div className="space-y-4">
                 {data.cashflow.outflow.map((item: any, i: number) => (
@@ -339,7 +339,7 @@ export default function Reports() {
         </div>
 
         <div className="mt-12 p-6 bg-gn-blackLight/50 rounded-2xl border border-gn-surface flex justify-between items-center">
-            <span className="text-lg text-gray-400">{t('Net Cash Increase/Decrease')}</span>
+            <span className="text-lg text-gray-400">{t('reports.netCashChange')}</span>
             <span className={`text-2xl font-black ${data.cashflow.net_cash_flow >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               SAR {data.cashflow.net_cash_flow.toLocaleString()}
             </span>
@@ -355,7 +355,7 @@ export default function Reports() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <PieChart className="w-6 h-6 text-gn-gold" /> {t('Profit per Worker')}
+              <PieChart className="w-6 h-6 text-gn-gold" /> {t('reports.profitPerWorker')}
             </h3>
             <div className="space-y-4">
               {data.insights.workers.slice(0, 5).map((w: any, i: number) => (
@@ -364,7 +364,7 @@ export default function Reports() {
                     <p className="text-white font-bold group-hover:text-gn-gold flex items-center gap-2">
                        <ArrowUpRight className="w-4 h-4 text-green-500" /> {w.worker_name}
                     </p>
-                    <p className="text-gray-500 text-xs">Rev: SAR {w.revenue} | Cost: SAR {w.cost}</p>
+                    <p className="text-gray-500 text-xs">{t('common.revenue')}: SAR {w.revenue} | {t('common.cost')}: SAR {w.cost}</p>
                   </div>
                   <span className="text-green-400 font-bold">SAR {w.profit.toLocaleString()}</span>
                 </div>
@@ -374,18 +374,18 @@ export default function Reports() {
 
           <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-blue-400" /> {t('Profit per Company')}
+              <BarChart3 className="w-6 h-6 text-blue-400" /> {t('reports.profitPerClient')}
             </h3>
             <div className="space-y-4">
               {data.insights.companies.slice(0, 5).map((c: any, i: number) => (
                 <div key={i} className="flex justify-between items-center p-4 bg-gn-blackLight/30 rounded-xl hover:bg-gn-white/5 transition">
                   <div>
                     <p className="text-white font-bold">{c.company_name}</p>
-                    <p className="text-gray-500 text-xs">{c.active_workers} {t('Active Workers')}</p>
+                    <p className="text-gray-500 text-xs">{c.active_workers} {t('dashboard.stats.activeWorkers')}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-gn-gold font-bold">SAR {c.profit.toLocaleString()}</p>
-                    <p className="text-[10px] text-gray-500">Margin: {((c.profit/c.revenue)*100).toFixed(1)}%</p>
+                    <p className="text-[10px] text-gray-500">{t('common.margin')}: {((c.profit/c.revenue)*100).toFixed(1)}%</p>
                   </div>
                 </div>
               ))}
@@ -400,15 +400,15 @@ export default function Reports() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">{t('Financial Intelligence')}</h2>
-          <p className="text-gray-400 text-xs mt-1">{t('Real-time insights into your manpower operations')}</p>
+          <h2 className="text-2xl font-bold text-white">{t('reports.financialIntelligence')}</h2>
+          <p className="text-gray-400 text-xs mt-1">{t('reports.realTimeInsights')}</p>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
           <button
             onClick={() => printWithLang('bn')}
             className="flex items-center gap-2 px-6 py-2 bg-gn-white/10 text-white hover:bg-gn-white/20 font-bold rounded-xl transition border border-gn-surface"
           >
-            <Printer className="w-4 h-4" /> Print (BN)
+            <Printer className="w-4 h-4" /> {t('common.print')} (BN)
           </button>
           <button 
             onClick={() => handleExport('excel')}
@@ -416,7 +416,7 @@ export default function Reports() {
             className={`flex items-center gap-2 px-6 py-2 ${exporting === 'excel' ? 'bg-gn-surface text-gray-400' : 'bg-gn-gold hover:bg-gn-gold/90 text-gn-black'} font-bold rounded-xl transition shadow-lg shadow-gn-gold/20`}
           >
             <Download className="w-4 h-4" />
-            {exporting === 'excel' ? t('Loading') : t('Export to Excel')}
+            {exporting === 'excel' ? t('common.loading') : t('reports.exportToExcel')}
           </button>
           <button 
             onClick={() => handleExport('csv')}
@@ -424,15 +424,15 @@ export default function Reports() {
             className={`flex items-center gap-2 px-6 py-2 ${exporting === 'csv' ? 'bg-gn-surface text-gray-400' : 'bg-gn-white/10 text-white hover:bg-gn-white/20'} font-bold rounded-xl transition border border-gn-surface`}
           >
             <Download className="w-4 h-4" />
-            {exporting === 'csv' ? t('Loading') : t('Export to CSV')}
+            {exporting === 'csv' ? t('common.loading') : t('reports.exportToCsv')}
           </button>
           <div className="flex bg-gn-surface/50 p-1 rounded-xl border border-gn-surface">
-            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<TrendingUp className="w-4 h-4" />} label="Overview" />
+            <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={<TrendingUp className="w-4 h-4" />} label={t('dashboard.overview')} />
             <TabButton active={activeTab === 'pl'} onClick={() => setActiveTab('pl')} icon={<Receipt className="w-4 h-4" />} label="P&L" />
-            <TabButton active={activeTab === 'balance'} onClick={() => setActiveTab('balance')} icon={<Scale className="w-4 h-4" />} label="Balance" />
-            <TabButton active={activeTab === 'cashflow'} onClick={() => setActiveTab('cashflow')} icon={<MoveRight className="w-4 h-4" />} label="Cash Flow" />
-            <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<PieChart className="w-4 h-4" />} label="Insights" />
-            <TabButton active={activeTab === 'advanced'} onClick={() => setActiveTab('advanced')} icon={<Settings className="w-4 h-4" />} label="Advanced" />
+            <TabButton active={activeTab === 'balance'} onClick={() => setActiveTab('balance')} icon={<Scale className="w-4 h-4" />} label={t('accounting.balanceSheet')} />
+            <TabButton active={activeTab === 'cashflow'} onClick={() => setActiveTab('cashflow')} icon={<MoveRight className="w-4 h-4" />} label={t('accounting.cashFlow')} />
+            <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<PieChart className="w-4 h-4" />} label={t('reports.insights')} />
+            <TabButton active={activeTab === 'advanced'} onClick={() => setActiveTab('advanced')} icon={<Settings className="w-4 h-4" />} label={t('reports.advanced')} />
             <TabButton active={activeTab === 'egyptian'} onClick={() => setActiveTab('egyptian')} icon={<Database className="w-4 h-4" />} label="مصري" />
           </div>
         </div>
@@ -491,10 +491,11 @@ function SummaryCard({ title, amount, icon, trend, color }: any) {
 }
 
 function LoadingSpinner() {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-20 animate-pulse">
       <div className="w-12 h-12 border-4 border-gn-gold border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p className="text-gray-500">Generating report data...</p>
+      <p className="text-gray-500">{t('common.loading')}</p>
     </div>
   );
 }

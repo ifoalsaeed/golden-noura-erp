@@ -100,21 +100,21 @@ export default function Invoices() {
       });
     } catch (err) {
       console.error(err);
-      alert('Failed to create invoice');
+      alert(t('invoices.createError'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleMarkPaid = async (id: number) => {
-    if (!confirm(t('Are you sure you want to mark this invoice as PAID? This will record a receipt in the General Ledger.'))) return;
+    if (!confirm(t('invoices.confirmPaid'))) return;
     
     try {
       await api.post(`/invoices/${id}/pay`);
       fetchInvoices();
     } catch (err) {
       console.error(err);
-      alert('Failed to update invoice status');
+      alert(t('invoices.updateError'));
     }
   };
 
@@ -136,7 +136,7 @@ export default function Invoices() {
             }}/>
             <div className="flex flex-col">
                 <h1 className="text-2xl font-bold text-gn-gold">شركة جولدن نورة</h1>
-                <span className="text-sm text-gn-goldLight uppercase tracking-widest">Golden Noura Co. - Invoices</span>
+                <span className="text-sm text-gn-goldLight uppercase tracking-widest">{t('invoices.title')}</span>
             </div>
           </div>
           <div className="text-right text-gray-400 text-sm">
@@ -145,30 +145,30 @@ export default function Invoices() {
       </div>
 
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Invoices Management')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('invoices.title')}</h2>
         <div className="flex gap-2">
             <button
               onClick={() => printWithLang('en')}
               className="bg-gn-surface hover:bg-gn-surface/80 text-white font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg border border-gn-gold/20"
-              title="Print (English)"
+              title={t('common.print')}
             >
-              <Printer className="w-5 h-5 mr-2 ml-2" /> Print
+              <Printer className="w-5 h-5 mr-2 ml-2" /> {t('common.print')}
             </button>
             <button 
             onClick={() => {
-                if (confirm(t('Generate invoices for all active contracts?'))) {
+                if (confirm(t('invoices.confirmGenerateBulk'))) {
                     api.post('/invoices/generate-bulk').then(() => fetchInvoices());
                 }
             }}
             className="bg-gn-surface hover:bg-gn-surface/80 text-white font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg border border-gn-gold/20"
             >
-            <FileText className="w-5 h-5 mr-2 ml-2" /> {t('Generate Monthly Invoices')}
+            <FileText className="w-5 h-5 mr-2 ml-2" /> {t('invoices.generateMonthly')}
             </button>
             <button 
             onClick={() => setIsModalOpen(true)}
             className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-lg"
             >
-            <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Create Invoice')}
+            <Plus className="w-5 h-5 mr-2 ml-2" /> {t('invoices.newInvoice')}
             </button>
         </div>
       </div>
@@ -179,7 +179,7 @@ export default function Invoices() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" />
             <input 
               type="text" 
-              placeholder={t('Search invoices...')} 
+              placeholder={t('invoices.search')} 
               className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gn-gold" 
             />
           </div>
@@ -189,20 +189,20 @@ export default function Invoices() {
           <table className="w-full text-left">
             <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface text-center">
               <tr>
-                <th className="px-6 py-4">{t('Invoice #')}</th>
-                <th className="px-6 py-4">{t('Client')}</th>
-                <th className="px-6 py-4">{t('Issue Date')}</th>
-                <th className="px-6 py-4">{t('Due Date')}</th>
-                <th className="px-6 py-4">{t('Amount')}</th>
-                <th className="px-6 py-4">{t('Status')}</th>
-                <th className="px-6 py-4">{t('Action')}</th>
+                <th className="px-6 py-4">{t('invoices.invoiceNumber')}</th>
+                <th className="px-6 py-4">{t('invoices.client')}</th>
+                <th className="px-6 py-4">{t('invoices.issueDate')}</th>
+                <th className="px-6 py-4">{t('invoices.dueDate')}</th>
+                <th className="px-6 py-4">{t('invoices.amount')}</th>
+                <th className="px-6 py-4">{t('invoices.status')}</th>
+                <th className="px-6 py-4">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface text-center">
               {fetching ? (
-                <tr><td colSpan={7} className="px-6 py-8">{t('Loading')}...</td></tr>
+                <tr><td colSpan={7} className="px-6 py-8">{t('common.loading')}...</td></tr>
               ) : invoices.length === 0 ? (
-                <tr><td colSpan={7} className="px-6 py-8 text-gray-500">{t('No invoices found.')}</td></tr>
+                <tr><td colSpan={7} className="px-6 py-8 text-gray-500">{t('invoices.noInvoices')}</td></tr>
               ) : (
                 invoices.map((inv) => (
                   <tr key={inv.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -221,7 +221,7 @@ export default function Invoices() {
                           <button 
                             onClick={() => handleMarkPaid(inv.id)}
                             className="text-green-500 hover:text-green-400 transition flex items-center justify-center mx-auto"
-                            title={t('Mark as Paid')}
+                            title={t('invoices.markPaid')}
                           >
                               <CheckCircle className="w-5 h-5" />
                           </button>
@@ -229,14 +229,14 @@ export default function Invoices() {
                     {getUserRole() === Role.ADMIN && (
                     <button
                       onClick={() => {
-                        if (confirm(t('Request delete approval for this invoice?'))) {
+                        if (confirm(t('invoices.confirmDelete'))) {
                           requestApproval({ target_table: 'invoices', target_id: inv.id, action: 'DELETE' })
-                            .then(() => alert(t('Approval request sent to admin')))
-                            .catch(() => alert('Failed to send approval request'));
+                            .then(() => alert(t('approvals.requestSent')))
+                            .catch(() => alert(t('invoices.sendApprovalError')));
                         }
                       }}
                       className="text-red-400 hover:text-red-300 transition flex items-center justify-center mx-auto mt-2"
-                      title={t('Request Delete')}
+                      title={t('workers.requestEdit')}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -253,21 +253,21 @@ export default function Invoices() {
       <DataEntryModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Create Invoice"
+        title={t('invoices.newInvoice')}
         onSubmit={handleSubmit}
         loading={loading}
       >
         <div className="space-y-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Client')}
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('invoices.client')}
             </label>
             <select
               value={formData.client_id}
               onChange={(e) => setFormData({...formData, client_id: e.target.value})}
               className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
             >
-                <option value="">{t('Select Client')}</option>
+                <option value="">{t('common.select')} {t('invoices.client')}</option>
                 {clients.map(c => (
                     <option key={c.id} value={c.id}>{c.company_name}</option>
                 ))}
@@ -277,7 +277,7 @@ export default function Invoices() {
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Issue Date')}
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('invoices.issueDate')}
               </label>
               <input 
                 type="date" 
@@ -288,7 +288,7 @@ export default function Invoices() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Due Date')}
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('invoices.dueDate')}
               </label>
               <input 
                 type="date" 
@@ -301,7 +301,7 @@ export default function Invoices() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <DollarSign className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Amount (Before Tax)')}
+              <DollarSign className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('invoices.amount')}
             </label>
             <input 
               type="number" 
@@ -311,13 +311,13 @@ export default function Invoices() {
               placeholder="0.00"
             />
             <p className="text-xs text-gray-500 mt-1">
-                * VAT (15%) will be added automatically. Total: {(parseFloat(formData.amount || '0') * 1.15).toFixed(2)}
+                * {t('invoices.vatNote')} {(parseFloat(formData.amount || '0') * 1.15).toFixed(2)}
             </p>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Notes')}
+              <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('invoices.notes')}
             </label>
             <textarea 
               value={formData.notes}

@@ -48,7 +48,7 @@ export default function Expenses() {
   }, []);
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm(t('Are you sure?'))) return;
+    if (!window.confirm(t('common.confirmDelete'))) return;
     try {
       const resp = await fetch(`${API_URL}/api/v1/expenses/${id}`, { method: 'DELETE' });
       if (resp.ok) {
@@ -106,18 +106,18 @@ export default function Expenses() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-white">{t('Expenses')}</h2>
+        <h2 className="text-2xl font-bold text-white">{t('expenses.title')}</h2>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-bold py-2 px-6 rounded-lg flex items-center transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
         >
-          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('Add Expense')}
+          <Plus className="w-5 h-5 mr-2 ml-2" /> {t('expenses.addExpense')}
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-6 shadow-lg">
-          <p className="text-gray-400 text-sm">{t('Monthly Expenses')}</p>
+          <p className="text-gray-400 text-sm">{t('expenses.monthlyExpenses')}</p>
           <p className="text-2xl font-bold text-white mt-1">
             SAR {expenses.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
           </p>
@@ -128,7 +128,7 @@ export default function Expenses() {
         <div className="flex justify-between items-center mb-6">
           <div className="relative w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input type="text" placeholder={t('Search')} className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gn-gold" />
+            <input type="text" placeholder={t('common.search')} className="w-full bg-gn-blackLight border border-gn-surface rounded-lg pl-10 pr-4 py-2 text-white focus:outline-none focus:border-gn-gold" />
           </div>
         </div>
         
@@ -136,18 +136,18 @@ export default function Expenses() {
           <table className="w-full text-left text-gray-300">
             <thead className="text-xs text-gn-goldLight uppercase bg-gn-blackLight/50 border-b border-gn-surface">
               <tr>
-                <th className="px-6 py-4">{t('Date')}</th>
-                <th className="px-6 py-4">{t('Category')}</th>
-                <th className="px-6 py-4">{t('Description')}</th>
-                <th className="px-6 py-4">{t('Amount')}</th>
-                <th className="px-6 py-4 text-center">{t('Action')}</th>
+                <th className="px-6 py-4">{t('expenses.date')}</th>
+                <th className="px-6 py-4">{t('expenses.category')}</th>
+                <th className="px-6 py-4">{t('expenses.description')}</th>
+                <th className="px-6 py-4">{t('common.amount')}</th>
+                <th className="px-6 py-4 text-center">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gn-surface">
               {fetching ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('Loading')}...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center">{t('common.loading')}...</td></tr>
               ) : expenses.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('No data available')}</td></tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('common.noData')}</td></tr>
               ) : (
                 expenses.map((exp) => (
                   <tr key={exp.id} className="hover:bg-gn-blackLight/30 transition-colors">
@@ -160,10 +160,10 @@ export default function Expenses() {
                     <td className="px-6 py-4 text-sm">{exp.description}</td>
                     <td className="px-6 py-4 font-bold text-white">SAR {exp.amount.toLocaleString()}</td>
                     <td className="px-6 py-4 text-center flex justify-center gap-2">
-                      <button onClick={() => handleEdit(exp)} className="p-2 text-gn-gold hover:bg-gn-gold/10 rounded-lg transition" title={t('Edit')}>
+                      <button onClick={() => handleEdit(exp)} className="p-2 text-gn-gold hover:bg-gn-gold/10 rounded-lg transition" title={t('common.edit')}>
                         <Edit className="w-5 h-5" />
                       </button>
-                      <button onClick={() => handleDelete(exp.id)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition" title={t('Delete')}>
+                      <button onClick={() => handleDelete(exp.id)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition" title={t('common.delete')}>
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </td>
@@ -179,7 +179,7 @@ export default function Expenses() {
       <DataEntryModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Add Expense"
+        title={t('expenses.addExpense')}
         onSubmit={handleSubmit}
         loading={loading}
       >
@@ -187,7 +187,7 @@ export default function Expenses() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Date')}
+                <Calendar className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('expenses.date')}
               </label>
               <input 
                 type="date" 
@@ -198,27 +198,27 @@ export default function Expenses() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 flex items-center">
-                <Wallet className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Category')}
+                <Wallet className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('expenses.category')}
               </label>
               <select 
                 value={formData.category}
                 onChange={(e) => setFormData({...formData, category: e.target.value})}
                 className="w-full bg-gn-blackLight border border-gn-surface rounded-lg px-4 py-3 text-white focus:border-gn-gold outline-none"
               >
-                <option value="General">{t('General')}</option>
-                <option value="Salaries">{t('Salaries')}</option>
-                <option value="Rent">{t('Rent')}</option>
-                <option value="Maintenance">{t('Maintenance')}</option>
-                <option value="Government Fees">{t('Government Fees')}</option>
-                <option value="Utilities">{t('Utilities')}</option>
-                <option value="Other">{t('Other')}</option>
+                <option value="General">{t('expenses.categories.general')}</option>
+                <option value="Salaries">{t('expenses.categories.salaries')}</option>
+                <option value="Rent">{t('expenses.categories.rent')}</option>
+                <option value="Maintenance">{t('expenses.categories.maintenance')}</option>
+                <option value="Government Fees">{t('expenses.categories.governmentFees')}</option>
+                <option value="Utilities">{t('expenses.categories.utilities')}</option>
+                <option value="Other">{t('expenses.categories.other')}</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <DollarSign className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Amount')}
+              <DollarSign className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('common.amount')}
             </label>
             <input 
               type="number" 
@@ -231,11 +231,11 @@ export default function Expenses() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-400 flex items-center">
-              <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Description')}
+              <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('expenses.description')}
             </label>
             <textarea 
               rows={3}
-              placeholder={t('Enter details...')}
+              placeholder={t('expenses.enterDetails')}
               value={formData.description}
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               className="w-full bg-gn-blackLight border border-gn-surface rounded-lg px-4 py-3 text-white focus:border-gn-gold outline-none resize-none"

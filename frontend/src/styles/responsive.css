@@ -1,29 +1,53 @@
 /**
- * Golden Noura ERP - Responsive Styles
- * متجاوب بالكامل على جميع الأجهزة
+ * Golden Noura ERP - Comprehensive Responsive Styles
+ * ==================================================
+ * Mobile First Responsive Design System
+ * breakpoints:
+ *   xs: < 480px      (Mobile small)
+ *   sm: 481-767px    (Mobile)
+ *   md: 768-1024px   (Tablet)
+ *   lg: 1025-1366px  (Laptop)
+ *   xl: > 1366px     (Desktop)
  */
 
 /* ============================================
-   القاعدة العامة - Base Styles (Mobile First)
+   BASE STYLES (Mobile First)
    ============================================ */
 
-/* تعطيل overflow على الجسم */
+/* Reset and Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html, body {
   overflow-x: hidden;
   width: 100%;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
 }
 
-/* صور متجاوبة */
-img {
+/* Responsive Images */
+img, video, canvas, svg {
   max-width: 100%;
   height: auto;
   display: block;
 }
 
-/* الجداول متجاوبة */
+/* Responsive Tables */
 .responsive-table {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.responsive-table::-webkit-scrollbar {
+  height: 4px;
+}
+
+.responsive-table::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 2px;
 }
 
 .responsive-table table {
@@ -31,10 +55,10 @@ img {
   width: 100%;
 }
 
-/* ============================================
-   الموبايل الصغير - Extra Small (xs)
-   أقل من 480px
-   ============================================ */
+/* Fluid Typography */
+html {
+  font-size: clamp(14px, 2.5vw, 16px);
+}
 @media (max-width: 480px) {
   /* Layout */
   .gn-layout {

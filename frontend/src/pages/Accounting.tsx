@@ -80,7 +80,7 @@ export default function Accounting() {
                 setPdfUrl(url);
                 setPdfError(null);
             } catch {
-                setPdfError(t('Server is unreachable. Please start the backend server on port 8000.'));
+                setPdfError(t('common.serverUnreachable'));
             }
         } finally {
             setCheckingPdf(false);
@@ -92,26 +92,26 @@ export default function Accounting() {
             <div className="flex justify-between items-center no-print">
                 <h2 className="text-2xl font-bold text-white flex items-center">
                     <Landmark className="w-8 h-8 ml-3 text-gn-gold" />
-                    {t('Accounting')}
+                    {t('accounting.title')}
                 </h2>
                 <div className="flex gap-3">
                     <button
                         onClick={() => setView('journal')}
                         className={`px-6 py-2 rounded-xl font-bold transition-all ${view === 'journal' ? 'bg-gn-gold text-gn-black' : 'bg-gn-surface text-gray-400 hover:text-white'}`}
                     >
-                        {t('Journal Entries')}
+                        {t('accounting.journalEntries')}
                     </button>
                     <button
                         onClick={() => setView('balanceSheet')}
                         className={`px-6 py-2 rounded-xl font-bold transition-all ${view === 'balanceSheet' ? 'bg-gn-gold text-gn-black' : 'bg-gn-surface text-gray-400 hover:text-white'}`}
                     >
-                        {t('Balance Sheet')}
+                        {t('accounting.balanceSheet')}
                     </button>
                     <button
                         onClick={() => setView('pdf')}
                         className={`px-6 py-2 rounded-xl font-bold transition-all ${view === 'pdf' ? 'bg-gn-gold text-gn-black' : 'bg-gn-surface text-gray-400 hover:text-white'}`}
                     >
-                        {t('Balance Sheet PDF')}
+                        {t('accounting.balanceSheetPdf')}
                     </button>
                 </div>
             </div>
@@ -120,20 +120,20 @@ export default function Accounting() {
                 <div className="space-y-6">
                     <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-6 shadow-lg overflow-hidden">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white">آخر القيود المحاسبية</h3>
+                            <h3 className="text-lg font-bold text-white">{t('accounting.latestEntries')}</h3>
                             <button className="bg-gn-gold hover:bg-gn-goldDark text-gn-black font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2">
-                                <Plus className="w-4 h-4" /> {t('New Entry')}
+                                <Plus className="w-4 h-4" /> {t('accounting.newEntry')}
                             </button>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-right text-gray-300">
                                 <thead className="text-[10px] font-black text-gn-gold uppercase tracking-widest bg-gn-blackLight/80 border-b border-gn-surface">
                                     <tr>
-                                        <th className="px-5 py-4">التاريخ</th>
-                                        <th className="px-5 py-4">البيان / الوصف</th>
-                                        <th className="px-5 py-4">مرجع الحساب</th>
-                                        <th className="px-5 py-4 text-center">مدين (-)</th>
-                                        <th className="px-5 py-4 text-center text-green-400">دائن (+)</th>
+                                        <th className="px-5 py-4">{t('accounting.date')}</th>
+                                        <th className="px-5 py-4">{t('accounting.description')}</th>
+                                        <th className="px-5 py-4">{t('accounting.accountRef')}</th>
+                                        <th className="px-5 py-4 text-center">{t('accounting.debit')}</th>
+                                        <th className="px-5 py-4 text-center text-green-400">{t('accounting.credit')}</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gn-surface">
@@ -167,13 +167,13 @@ export default function Accounting() {
                         </div>
                         <div className="flex gap-2">
                             <button onClick={handlePrint} className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black">
-                                <Printer className="w-5 h-5" /> {t('Print Statement')}
+                                <Printer className="w-5 h-5" /> {t('accounting.printStatement')}
                             </button>
                             <a
                               href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/accounting/balance-sheet/export?year=${year}&format=excel`}
                               className="bg-gn-gold text-gn-black font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-goldDark"
                             >
-                              {t('Export Excel')}
+                              {t('accounting.exportExcel')}
                             </a>
                         </div>
                     </div>
@@ -187,12 +187,12 @@ export default function Accounting() {
                         </div>
 
                         {loading ? (
-                            <div className="flex justify-center items-center py-20 text-gn-gold font-bold">{t('Generating Statement...')}</div>
+                            <div className="flex justify-center items-center py-20 text-gn-gold font-bold">{t('accounting.generatingStatement')}</div>
                         ) : balanceSheet ? (
                             <div className="grid grid-cols-2 gap-10">
                                 {/* ASSETS COL */}
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('Assets')}</h3>
+                                    <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('accounting.assets')}</h3>
                                     <div className="space-y-2">
                                         {balanceSheet.assets.items.map((item, i) => (
                                             <div key={i} className="flex justify-between border-b border-gray-100 pb-1">
@@ -202,7 +202,7 @@ export default function Accounting() {
                                         ))}
                                     </div>
                                     <div className="flex justify-between font-black text-lg pt-4 border-t-2 border-black">
-                                        <span>{t('Total Assets')}</span>
+                                        <span>{t('accounting.totalAssets')}</span>
                                         <span className="underline decoration-double">{balanceSheet.assets.total.toLocaleString()}</span>
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@ export default function Accounting() {
                                 {/* LIABILITIES & EQUITY COL */}
                                 <div className="space-y-6">
                                     <div className="space-y-6">
-                                        <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('Liabilities')}</h3>
+                                        <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('accounting.liabilities')}</h3>
                                         <div className="space-y-2">
                                             {balanceSheet.liabilities.items.map((item, i) => (
                                                 <div key={i} className="flex justify-between border-b border-gray-100 pb-1">
@@ -220,13 +220,13 @@ export default function Accounting() {
                                             ))}
                                         </div>
                                         <div className="flex justify-between font-bold pt-2 border-t border-gray-200 uppercase text-sm">
-                                            <span>{t('Total Liabilities')}</span>
+                                            <span>{t('accounting.totalLiabilities')}</span>
                                             <span>{balanceSheet.liabilities.total.toLocaleString()}</span>
                                         </div>
                                     </div>
 
                                     <div className="space-y-6 pt-6">
-                                        <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('Equity')}</h3>
+                                        <h3 className="text-lg font-black bg-gray-100 p-2 border-l-4 border-gn-gold uppercase">{t('accounting.equity')}</h3>
                                         <div className="space-y-2">
                                             {balanceSheet.equity.items.map((item, i) => (
                                                 <div key={i} className={`flex justify-between border-b border-gray-100 pb-1 ${item.code === 'INC' ? 'text-gn-goldDark font-bold italic' : ''}`}>
@@ -236,24 +236,24 @@ export default function Accounting() {
                                             ))}
                                         </div>
                                         <div className="flex justify-between font-bold pt-2 border-t border-gray-200 uppercase text-sm">
-                                            <span>{t('Total Equity')}</span>
+                                            <span>{t('accounting.totalEquity')}</span>
                                             <span>{balanceSheet.equity.total.toLocaleString()}</span>
                                         </div>
                                     </div>
 
                                     <div className="flex justify-between font-black text-lg pt-4 border-t-2 border-black mt-10">
-                                        <span className="text-sm">{t('Total Liabilities & Equity')}</span>
+                                        <span className="text-sm">{t('accounting.totalLiabilitiesEquity')}</span>
                                         <span className="underline decoration-double">{balanceSheet.total_liabilities_and_equity.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center py-20 text-gray-400">{t('No data available for this year.')}</div>
+                            <div className="text-center py-20 text-gray-400">{t('accounting.noDataForYear')}</div>
                         )}
 
                         <div className="mt-20 border-t pt-6 flex justify-between text-[10px] text-gray-400 uppercase tracking-widest font-black">
-                            <span>{t('Confidential Statement')}</span>
-                            <span>{t('Generated by Golden Noura ERP')}</span>
+                            <span>{t('accounting.confidentialStatement')}</span>
+                            <span>{t('accounting.generatedBy')}</span>
                             <span>{new Date().toLocaleDateString()}</span>
                         </div>
                     </div>
@@ -274,14 +274,14 @@ export default function Accounting() {
                                   target="_blank"
                                   className="bg-gn-gold text-gn-black font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-goldDark"
                                 >
-                                  {t('Open in New Tab')}
+                                  {t('accounting.openInNewTab')}
                                 </a>
                                 <a
                                   href={pdfUrl}
                                   download={`balance_sheet_${year}.pdf`}
                                   className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black"
                                 >
-                                  {t('Download PDF')}
+                                  {t('common.downloadPdf')}
                                 </a>
                               </>
                             )}
@@ -289,13 +289,13 @@ export default function Accounting() {
                               onClick={checkPdf}
                               className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black"
                             >
-                              {t('Refresh')}
+                              {t('common.refresh')}
                             </button>
                         </div>
                     </div>
                     {checkingPdf && (
                         <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-8 text-center text-gn-gold font-bold">
-                            {t('Checking server availability...')}
+                            {t('common.checkingServer')}
                         </div>
                     )}
                     {pdfError && (
