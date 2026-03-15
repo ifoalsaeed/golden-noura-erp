@@ -19,10 +19,13 @@ interface BalanceSheetData {
 
 export default function Accounting() {
     const { t } = useTranslation();
-    const [view, setView] = useState<'journal' | 'balanceSheet'>('journal');
+    const [view, setView] = useState<'journal' | 'balanceSheet' | 'pdf'>('journal');
     const [balanceSheet, setBalanceSheet] = useState<BalanceSheetData | null>(null);
     const [year, setYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+    const [pdfError, setPdfError] = useState<string | null>(null);
+    const [checkingPdf, setCheckingPdf] = useState(false);
 
     const [transactions] = useState([
         { id: 1, date: '2026-03-09', desc: 'استحقاق رواتب شهر مارس', account: 'الرواتب والأجور', debit: 45000, credit: 0 },
@@ -33,6 +36,9 @@ export default function Accounting() {
     useEffect(() => {
         if (view === 'balanceSheet') {
             fetchBalanceSheet();
+        }
+        if (view === 'pdf') {
+            checkPdf();
         }
     }, [view, year]);
 
@@ -50,6 +56,35 @@ export default function Accounting() {
 
     const handlePrint = () => {
         window.print();
+    };
+
+    const checkPdf = async () => {
+        try {
+            setCheckingPdf(true);
+            setPdfError(null);
+            setPdfUrl(null);
+            const res = await api.get(`/accounting/balance-sheet/pdf`, {
+                params: { year },
+                responseType: 'blob'
+            });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            setPdfUrl(url);
+        } catch (e: any) {
+            try {
+                const fallback = `${(import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1')}/accounting/balance-sheet/pdf?year=${year}`;
+                const resp = await fetch(fallback);
+                if (!resp.ok) throw new Error('fallback failed');
+                const blob = await resp.blob();
+                const url = URL.createObjectURL(blob);
+                setPdfUrl(url);
+                setPdfError(null);
+            } catch {
+                setPdfError(t('Server is unreachable. Please start the backend server on port 8000.'));
+            }
+        } finally {
+            setCheckingPdf(false);
+        }
     };
 
     return (
@@ -71,6 +106,12 @@ export default function Accounting() {
                         className={`px-6 py-2 rounded-xl font-bold transition-all ${view === 'balanceSheet' ? 'bg-gn-gold text-gn-black' : 'bg-gn-surface text-gray-400 hover:text-white'}`}
                     >
                         {t('Balance Sheet')}
+                    </button>
+                    <button
+                        onClick={() => setView('pdf')}
+                        className={`px-6 py-2 rounded-xl font-bold transition-all ${view === 'pdf' ? 'bg-gn-gold text-gn-black' : 'bg-gn-surface text-gray-400 hover:text-white'}`}
+                    >
+                        {t('Balance Sheet PDF')}
                     </button>
                 </div>
             </div>
@@ -116,7 +157,7 @@ export default function Accounting() {
                         </div>
                     </div>
                 </div>
-            ) : (
+            ) : view === 'balanceSheet' ? (
                 <div className="space-y-6">
                     <div className="flex justify-between items-center no-print">
                         <div className="flex items-center gap-4 bg-gn-surface/50 p-2 rounded-xl border border-gn-surface">
@@ -124,9 +165,17 @@ export default function Accounting() {
                             <span className="text-xl font-black text-white px-4">{year}</span>
                             <button onClick={() => setYear(y => y + 1)} className="p-2 hover:bg-gn-gold/10 rounded-lg text-gn-gold"><ArrowUpRight className="w-4 h-4 -rotate-90" /></button>
                         </div>
-                        <button onClick={handlePrint} className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black">
-                            <Printer className="w-5 h-5" /> {t('Print Statement')}
-                        </button>
+                        <div className="flex gap-2">
+                            <button onClick={handlePrint} className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black">
+                                <Printer className="w-5 h-5" /> {t('Print Statement')}
+                            </button>
+                            <a
+                              href={`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'}/accounting/balance-sheet/export?year=${year}&format=excel`}
+                              className="bg-gn-gold text-gn-black font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-goldDark"
+                            >
+                              {t('Export Excel')}
+                            </a>
+                        </div>
                     </div>
 
                     <div className="bg-white text-black p-10 rounded-2xl shadow-2xl balance-sheet-print min-h-[1000px]">
@@ -208,6 +257,61 @@ export default function Accounting() {
                             <span>{new Date().toLocaleDateString()}</span>
                         </div>
                     </div>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center no-print">
+                        <div className="flex items-center gap-4 bg-gn-surface/50 p-2 rounded-xl border border-gn-surface">
+                            <button onClick={() => setYear(y => y - 1)} className="p-2 hover:bg-gn-gold/10 rounded-lg text-gn-gold"><ArrowDownRight className="w-4 h-4 rotate-90" /></button>
+                            <span className="text-xl font-black text-white px-4">{year}</span>
+                            <button onClick={() => setYear(y => y + 1)} className="p-2 hover:bg-gn-gold/10 rounded-lg text-gn-gold"><ArrowUpRight className="w-4 h-4 -rotate-90" /></button>
+                        </div>
+                        <div className="flex gap-2">
+                            {pdfUrl && (
+                              <>
+                                <a
+                                  href={pdfUrl}
+                                  target="_blank"
+                                  className="bg-gn-gold text-gn-black font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-goldDark"
+                                >
+                                  {t('Open in New Tab')}
+                                </a>
+                                <a
+                                  href={pdfUrl}
+                                  download={`balance_sheet_${year}.pdf`}
+                                  className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black"
+                                >
+                                  {t('Download PDF')}
+                                </a>
+                              </>
+                            )}
+                            <button
+                              onClick={checkPdf}
+                              className="bg-gn-surface border border-gn-gold/20 text-gn-gold font-black py-2 px-6 rounded-xl flex items-center transition shadow-lg gap-2 hover:bg-gn-gold hover:text-gn-black"
+                            >
+                              {t('Refresh')}
+                            </button>
+                        </div>
+                    </div>
+                    {checkingPdf && (
+                        <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-8 text-center text-gn-gold font-bold">
+                            {t('Checking server availability...')}
+                        </div>
+                    )}
+                    {pdfError && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center text-red-400 font-bold">
+                            {pdfError}
+                        </div>
+                    )}
+                    {pdfUrl && !checkingPdf && !pdfError && (
+                        <div className="bg-gn-surface/50 border border-gn-surface rounded-xl p-2 h-[80vh]">
+                            <iframe
+                                title="Balance Sheet PDF"
+                                src={pdfUrl}
+                                className="w-full h-full rounded-lg bg-black"
+                            />
+                        </div>
+                    )}
                 </div>
             )}
 

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, TrendingDown, DollarSign, Download, Calendar, ArrowUpRight, ArrowDownRight, PieChart, BarChart3, List, Scale, MoveRight, Receipt } from 'lucide-react';
+import api from '../api';
+import { TrendingUp, TrendingDown, DollarSign, Download, Calendar, ArrowUpRight, ArrowDownRight, PieChart, BarChart3, List, Scale, MoveRight, Receipt, Printer, FileText, Settings, Filter, Database } from 'lucide-react';
+import { printWithLang } from '../utils/printLang';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Cell, PieChart as RePieChart, Pie } from 'recharts';
+import { AdvancedReportBuilder } from '../components/reports/AdvancedReportBuilder';
+import { EgyptianReportBuilder } from '../components/reports/EgyptianReportBuilder';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-
-type TabType = 'overview' | 'pl' | 'balance' | 'cashflow' | 'insights';
+type TabType = 'overview' | 'pl' | 'balance' | 'cashflow' | 'insights' | 'advanced' | 'egyptian';
 
 export default function Reports() {
   const { t } = useTranslation();
@@ -23,13 +25,17 @@ export default function Reports() {
   });
   const [exporting, setExporting] = useState<string | null>(null);
 
+  // Date Filter State
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0]
+  });
+
   const handleExport = async (format: 'excel' | 'csv' = 'excel') => {
     setExporting(format);
     try {
-      const resp = await fetch(`${API_URL}/api/v1/reports/export?format=${format}`);
-      if (!resp.ok) throw new Error('Export failed');
-      const blob = await resp.blob();
-      const url = window.URL.createObjectURL(blob);
+      const resp = await api.get(`/reports/export?format=${format}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([resp.data]));
       const a = document.createElement('a');
       a.href = url;
       a.download = `Golden_Noura_Report_${new Date().toISOString().split('T')[0]}.${format === 'excel' ? 'xlsx' : 'csv'}`;
@@ -50,42 +56,25 @@ export default function Reports() {
     try {
       if (activeTab === 'overview') {
         const [sumResp, lineResp] = await Promise.all([
-          fetch(`${API_URL}/api/v1/reports/summary`),
-          fetch(`${API_URL}/api/v1/reports/timeline`)
+          api.get('/reports/summary'),
+          api.get('/reports/timeline')
         ]);
-        if (sumResp.ok && lineResp.ok) {
-          const sumData = await sumResp.json();
-          const lineData = await lineResp.json();
-          setData((prev: any) => ({ ...prev, ...sumData, timeline: lineData }));
-        }
+        setData((prev: any) => ({ ...prev, ...sumResp.data, timeline: lineResp.data }));
       } else if (activeTab === 'pl') {
-        const resp = await fetch(`${API_URL}/api/v1/reports/profit-loss`);
-        if (resp.ok) {
-          const plData = await resp.json();
-          setData((prev: any) => ({ ...prev, pl: plData }));
-        }
+        const resp = await api.get(`/reports/profit-loss?start_date=${dateRange.startDate}&end_date=${dateRange.endDate}`);
+        setData((prev: any) => ({ ...prev, pl: resp.data }));
       } else if (activeTab === 'balance') {
-        const resp = await fetch(`${API_URL}/api/v1/reports/balance-sheet`);
-        if (resp.ok) {
-          const balanceData = await resp.json();
-          setData((prev: any) => ({ ...prev, balance: balanceData }));
-        }
+        const resp = await api.get(`/reports/balance-sheet?as_of_date=${dateRange.endDate}`);
+        setData((prev: any) => ({ ...prev, balance: resp.data }));
       } else if (activeTab === 'cashflow') {
-        const resp = await fetch(`${API_URL}/api/v1/reports/cash-flow`);
-        if (resp.ok) {
-          const cfData = await resp.json();
-          setData((prev: any) => ({ ...prev, cashflow: cfData }));
-        }
+        const resp = await api.get('/reports/cash-flow');
+        setData((prev: any) => ({ ...prev, cashflow: resp.data }));
       } else if (activeTab === 'insights') {
         const [wResp, cResp] = await Promise.all([
-          fetch(`${API_URL}/api/v1/reports/profit-per-worker`),
-          fetch(`${API_URL}/api/v1/reports/profit-per-company`)
+          api.get('/reports/profit-per-worker'),
+          api.get('/reports/profit-per-company')
         ]);
-        if (wResp.ok && cResp.ok) {
-          const wData = await wResp.json();
-          const cData = await cResp.json();
-          setData((prev: any) => ({ ...prev, insights: { workers: wData, companies: cData } }));
-        }
+        setData((prev: any) => ({ ...prev, insights: { workers: wResp.data, companies: cResp.data } }));
       }
     } catch (err) {
       console.error(err);
@@ -96,7 +85,7 @@ export default function Reports() {
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, dateRange]);
 
   const renderOverview = () => (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -155,11 +144,26 @@ export default function Reports() {
     if (!data.pl) return <LoadingSpinner />;
     return (
       <div className="space-y-6 animate-in slide-in-from-bottom duration-500">
+        <div className="flex justify-end gap-4 mb-4">
+            <input 
+                type="date" 
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                className="bg-gn-blackLight border border-gn-surface text-white px-4 py-2 rounded-lg"
+            />
+            <span className="text-white self-center">to</span>
+            <input 
+                type="date" 
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                className="bg-gn-blackLight border border-gn-surface text-white px-4 py-2 rounded-lg"
+            />
+        </div>
         <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-8 overflow-hidden">
           <div className="flex justify-between items-center mb-10">
             <div>
               <h3 className="text-2xl font-bold text-white">{t('Profit & Loss Statement')}</h3>
-              <p className="text-gray-400 text-sm mt-1">{new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}</p>
+              <p className="text-gray-400 text-sm mt-1">{t('Period')}: {dateRange.startDate} - {dateRange.endDate}</p>
             </div>
             <div className={`px-6 py-2 rounded-full font-bold text-lg ${data.pl.net_profit >= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
               {t('Net Profit')}: SAR {data.pl.net_profit.toLocaleString()}
@@ -212,61 +216,79 @@ export default function Reports() {
     if (!data.balance) return <LoadingSpinner />;
     const { assets, liabilities, equity } = data.balance;
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in slide-in-from-left duration-500">
-        <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <Scale className="w-6 h-6 text-gn-gold" /> {t('Assets')}
-          </h3>
-          <div className="space-y-4">
-            {assets.items.map((item: any, i: number) => (
-              <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
-                <span className="text-gray-400">{item.name} <span className="text-xs ml-2 opacity-50">({item.code})</span></span>
-                <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
-              </div>
-            ))}
-            <div className="flex justify-between p-4 bg-gn-gold/10 border border-gn-gold/20 rounded-xl font-bold text-white mt-8">
-              <span>{t('Total Assets')}</span>
-              <span>SAR {assets.total.toLocaleString()}</span>
-            </div>
-          </div>
+      <div className="space-y-6 animate-in slide-in-from-left duration-500">
+        <div className="flex justify-end gap-4 mb-4">
+            <span className="text-white self-center">{t('As of')}:</span>
+            <input 
+                type="date" 
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                className="bg-gn-blackLight border border-gn-surface text-white px-4 py-2 rounded-lg"
+            />
         </div>
-
-        <div className="space-y-6">
-          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
             <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Receipt className="w-6 h-6 text-red-400" /> {t('Liabilities')}
+                <Scale className="w-6 h-6 text-gn-gold" /> {t('Assets')}
             </h3>
             <div className="space-y-4">
-              {liabilities.items.map((item: any, i: number) => (
-                <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
-                  <span className="text-gray-400">{item.name}</span>
-                  <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+                {assets.accounts.map((item: any, i: number) => (
+                <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg hover:bg-gn-blackLight/50 transition">
+                    <span className="text-gray-400">{item.name} <span className="text-xs ml-2 opacity-50">({item.code})</span></span>
+                    <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
                 </div>
-              ))}
-              <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
-                <span>{t('Total Liabilities')}</span>
-                <span>SAR {liabilities.total.toLocaleString()}</span>
-              </div>
+                ))}
+                <div className="flex justify-between p-4 bg-gn-gold/10 border border-gn-gold/20 rounded-xl font-bold text-white mt-8">
+                <span>{t('Total Assets')}</span>
+                <span>SAR {assets.total.toLocaleString()}</span>
+                </div>
             </div>
-          </div>
+            </div>
 
-          <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <MoveRight className="w-6 h-6 text-green-400" /> {t('Equity')}
-            </h3>
-            <div className="space-y-4">
-              {equity.items.map((item: any, i: number) => (
-                <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg">
-                  <span className="text-gray-400">{item.name}</span>
-                  <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+            <div className="space-y-6">
+            <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <Receipt className="w-6 h-6 text-red-400" /> {t('Liabilities')}
+                </h3>
+                <div className="space-y-4">
+                {liabilities.accounts.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg hover:bg-gn-blackLight/50 transition">
+                    <span className="text-gray-400">{item.name} <span className="text-xs ml-2 opacity-50">({item.code})</span></span>
+                    <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+                    </div>
+                ))}
+                <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
+                    <span>{t('Total Liabilities')}</span>
+                    <span>SAR {liabilities.total.toLocaleString()}</span>
                 </div>
-              ))}
-              <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
-                <span>{t('Total Equity')}</span>
-                <span>SAR {equity.total.toLocaleString()}</span>
-              </div>
+                </div>
             </div>
-          </div>
+
+            <div className="bg-gn-surface/50 border border-gn-surface rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <MoveRight className="w-6 h-6 text-green-400" /> {t('Equity')}
+                </h3>
+                <div className="space-y-4">
+                {equity.accounts.map((item: any, i: number) => (
+                    <div key={i} className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg hover:bg-gn-blackLight/50 transition">
+                    <span className="text-gray-400">{item.name} <span className="text-xs ml-2 opacity-50">({item.code})</span></span>
+                    <span className="text-white font-bold">SAR {item.balance.toLocaleString()}</span>
+                    </div>
+                ))}
+                
+                {/* Explicit Retained Earnings Display */}
+                <div className="flex justify-between p-3 bg-gn-blackLight/30 rounded-lg border-l-2 border-green-500">
+                    <span className="text-gray-300">{t('Retained Earnings')}</span>
+                    <span className="text-white font-bold">SAR {equity.retained_earnings.toLocaleString()}</span>
+                </div>
+
+                <div className="flex justify-between p-3 font-bold text-white border-t border-gn-surface mt-2">
+                    <span>{t('Total Equity')}</span>
+                    <span>SAR {equity.total.toLocaleString()}</span>
+                </div>
+                </div>
+            </div>
+            </div>
         </div>
       </div>
     );
@@ -382,6 +404,12 @@ export default function Reports() {
           <p className="text-gray-400 text-xs mt-1">{t('Real-time insights into your manpower operations')}</p>
         </div>
         <div className="flex flex-wrap gap-3 items-center">
+          <button
+            onClick={() => printWithLang('bn')}
+            className="flex items-center gap-2 px-6 py-2 bg-gn-white/10 text-white hover:bg-gn-white/20 font-bold rounded-xl transition border border-gn-surface"
+          >
+            <Printer className="w-4 h-4" /> Print (BN)
+          </button>
           <button 
             onClick={() => handleExport('excel')}
             disabled={!!exporting}
@@ -404,6 +432,8 @@ export default function Reports() {
             <TabButton active={activeTab === 'balance'} onClick={() => setActiveTab('balance')} icon={<Scale className="w-4 h-4" />} label="Balance" />
             <TabButton active={activeTab === 'cashflow'} onClick={() => setActiveTab('cashflow')} icon={<MoveRight className="w-4 h-4" />} label="Cash Flow" />
             <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={<PieChart className="w-4 h-4" />} label="Insights" />
+            <TabButton active={activeTab === 'advanced'} onClick={() => setActiveTab('advanced')} icon={<Settings className="w-4 h-4" />} label="Advanced" />
+            <TabButton active={activeTab === 'egyptian'} onClick={() => setActiveTab('egyptian')} icon={<Database className="w-4 h-4" />} label="مصري" />
           </div>
         </div>
       </div>
@@ -415,6 +445,8 @@ export default function Reports() {
           {activeTab === 'balance' && renderBalanceSheet()}
           {activeTab === 'cashflow' && renderCashFlow()}
           {activeTab === 'insights' && renderInsights()}
+          {activeTab === 'advanced' && <AdvancedReportBuilder />}
+          {activeTab === 'egyptian' && <EgyptianReportBuilder />}
         </>
       )}
     </div>

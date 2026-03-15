@@ -1,380 +1,103 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import HttpBackend from 'i18next-http-backend';
+import LanguageDetector from 'i18next-browser-languagedetector';
 
-const resources = {
-  ar: {
-    translation: {
-      // Navigation
-      "Dashboard": "لوحة القيادة",
-      "Workers": "العمال",
-      "Clients": "العملاء",
-      "Contracts": "العقود",
-      "Payroll": "الرواتب",
-      "Expenses": "المصروفات",
-      "Accounting": "المحاسبة",
-      "Reports": "التقارير",
-      "Settings": "الإعدادات",
+/**
+ * i18n Configuration for Golden Noura ERP
+ * Supports: Arabic (ar), Bengali (bn), English (en)
+ * 
+ * Special Print Rules:
+ * - Bengali UI + Invoice/Contract → English print
+ * - Arabic UI → Arabic print
+ * - English UI → English print
+ */
 
-      // Auth
-      "Login": "تسجيل الدخول",
-      "Logout": "تسجيل الخروج",
-      "Username": "اسم المستخدم",
-      "Password": "كلمة المرور",
-      "Welcome back": "مرحباً بعودتك",
-      "Golden Noura ERP": "نظام نور الذهبي",
-      "Invalid username or password": "اسم المستخدم أو كلمة المرور غير صحيحة",
-      "Connection error. Use admin / admin123 to login.": "خطأ في الاتصال. استخدم admin / admin123 للدخول",
+// Get saved language from localStorage or default to 'ar'
+const getSavedLanguage = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('i18nLanguage') || 'ar';
+  }
+  return 'ar';
+};
 
-      // Dashboard
-      "Total Workers": "إجمالي العمال",
-      "Active Workers": "عمال نشطون",
-      "Monthly Revenue": "الإيراد الشهري",
-      "Net Profit": "صافي الربح",
-      "Financial Overview": "نظرة عامة مالية",
-      "System Settings": "إعدادات النظام",
+// Get direction based on language
+export const getDirection = (lang: string): 'rtl' | 'ltr' => {
+  return lang === 'ar' ? 'rtl' : 'ltr';
+};
 
-      // Workers page
-      "Add Worker": "إضافة عامل",
-      "Search workers...": "بحث عن عمال...",
-      "Name": "الاسم",
-      "Nationality": "الجنسية",
-      "Profession": "المهنة",
-      "Status": "الحالة",
-      "Action": "الإجراء",
-      "No workers database rows yet. Backend fully connected!": "لا يوجد عمال بعد. السيرفر متصل!",
-
-      // Clients page
-      "Add Client": "إضافة عميل",
-      "Search clients...": "بحث عن عملاء...",
-      "Company Name": "اسم الشركة",
-      "Contact Person": "المسؤول",
-      "Phone": "الهاتف",
-      "No clients added yet.": "لا يوجد عملاء بعد.",
-
-      // Contracts page
-      "New Contract": "عقد جديد",
-      "Search contracts...": "بحث في العقود...",
-      "Contract #": "رقم العقد",
-      "Client": "العميل",
-      "Worker": "العامل",
-      "Rental Price": "سعر الإيجار",
-      "No active contracts yet.": "لا توجد عقود نشطة بعد.",
-
-      // Expenses page
-      "Add Expense": "إضافة مصروف",
-      "Monthly Expenses": "المصروفات الشهرية",
-      "Category": "الفئة",
-      "Amount": "المبلغ",
-      "Description": "الوصف",
-      "General": "عام",
-      "Salaries": "رواتب",
-      "Rent": "إيجار",
-      "Maintenance": "صيانة",
-      "Government Fees": "رسوم حكومية",
-      "Utilities": "خدمات (كهرباء/ماء)",
-      "Other": "أخرى",
-      "Enter details...": "أدخل التفاصيل...",
-
-      // Payroll page
-      "Process Payroll": "معالجة الرواتب",
-      "Period": "الفترة",
-      "Net Salary": "صافي الراتب",
-      "Paid": "تم الدفع",
-      "Processing": "جاري المعالجة",
-      "View Details": "عرض التفاصيل",
-      "Select Worker": "اختر العامل",
-      "Month": "الشهر",
-      "Year": "السنة",
-      "Bonuses": "مكافآت",
-      "Deductions": "خصومات",
-      "Mark as Paid": "تسجيل كمدفوع",
-      "Edit Details": "تعديل التفاصيل",
-      "Revenue Distribution": "توزيع الإيرادات",
-
-      // Reports page
-      "Reports Overview": "نظرة عامة على التقارير",
-      "Export to Excel": "تصدير إلى إكسل",
-      "Revenue vs Expenses": "الإيرادات مقابل المصروفات",
-      "Profit & Loss Statement": "قائمة الأرباح والخسائر",
-      "Balance Sheet": "الميزانية العمومية",
-      "Cash Flow Analysis": "تحليل التدفق النقدي",
-      "Assets": "الأصول",
-      "Liabilities": "الالتزامات",
-      "Equity": "حقوق الملكية",
-      "Total Assets": "إجمالي الأصول",
-      "Total Liabilities": "إجمالي الالتزامات",
-      "Total Equity": "إجمالي حقوق الملكية",
-      "Total Revenue": "إجمالي الإيرادات",
-      "Total Expenses": "إجمالي المصروفات",
-      "Net Cash Increase/Decrease": "صافي الزيادة/النقص في النقد",
-      "Cash Inflows": "التدفقات النقدية الداخلة",
-      "Cash Outflows": "التدفقات النقدية الخارجة",
-      "Profit per Worker": "أرباح كل عامل",
-      "Profit per Company": "أرباح كل شركة",
-      "Insights": "تحليلات متقدمة",
-      "Financial Intelligence": "الذكاء المالي",
-      "Real-time insights into your manpower operations": "رؤى فورية لعمليات تأجير العمالة",
-      "Tracking cash movement in and out": "تتبع حركة النقد الواردة والصادرة",
-
-      // Common
-      "Search": "بحث",
-      "Add": "إضافة",
-      "Edit": "تعديل",
-      "Delete": "حذف",
-      "Save": "حفظ",
-      "Cancel": "إلغاء",
-      "Active": "نشط",
-      "Inactive": "غير نشط",
-      "Revenue": "الإيراد",
-      "Loading": "جاري التحميل",
-      "No data available": "لا توجد بيانات متاحة",
-    }
-  },
-  bn: {
-    translation: {
-      // Navigation
-      "Dashboard": "ড্যাশবোর্ড",
-      "Workers": "কর্মী",
-      "Clients": "ক্লায়েন্ট",
-      "Contracts": "চুক্তি",
-      "Payroll": "বেতন",
-      "Expenses": "খরচ",
-      "Accounting": "হিসাবরক্ষণ",
-      "Reports": "রিপোর্ট",
-      "Settings": "সেটিংস",
-
-      // Auth
-      "Login": "লগইন",
-      "Logout": "লগআউট",
-      "Username": "ব্যবহারকারীর নাম",
-      "Password": "পাসওয়ার্ড",
-      "Welcome back": "আবার স্বাগতম",
-      "Golden Noura ERP": "গোল্ডেন নূরা ইআরপি",
-      "Invalid username or password": "ব্যবহারকারীর নাম বা পাসওয়ার্ড ভুল",
-      "Connection error. Use admin / admin123 to login.": "সংযোগ ত্রুটি। admin / admin123 দিয়ে লগইন করুন",
-
-      // Dashboard
-      "Total Workers": "মোট কর্মী",
-      "Active Workers": "সক্রিয় কর্মী",
-      "Monthly Revenue": "মাসিক আয়",
-      "Net Profit": "নিট লাভ",
-      "Financial Overview": "আর্থিক ওভারভিউ",
-      "System Settings": "সিস্টেম সেটিংস",
-
-      // Workers page
-      "Add Worker": "কর্মী যোগ করুন",
-      "Search workers...": "কর্মী খুঁজুন...",
-      "Name": "নাম",
-      "Nationality": "জাতীয়তা",
-      "Profession": "পেশা",
-      "Status": "অবস্থা",
-      "Action": "কার্যক্রম",
-      "No workers database rows yet. Backend fully connected!": "এখনো কোনো কর্মী নেই। ব্যাকএন্ড সংযুক্ত!",
-
-      // Clients page
-      "Add Client": "ক্লায়েন্ট যোগ করুন",
-      "Search clients...": "ক্লায়েন্ট খুঁজুন...",
-      "Company Name": "কোম্পানির নাম",
-      "Contact Person": "যোগাযোগের ব্যক্তি",
-      "Phone": "ফোন",
-      "No clients added yet.": "এখনো কোনো ক্লায়েন্ট নেই।",
-
-      // Contracts page
-      "New Contract": "নতুন চুক্তি",
-      "Search contracts...": "চুক্তি খুঁজুন...",
-      "Contract #": "চুক্তি নং",
-      "Client": "ক্লায়েন্ট",
-      "Worker": "কর্মী",
-      "Rental Price": "ভাড়ার মূল্য",
-      "No active contracts yet.": "এখনো কোনো সক্রিয় চুক্তি নেই।",
-
-      // Expenses page
-      "Add Expense": "খরচ যোগ করুন",
-      "Monthly Expenses": "মাসিক খরচ",
-      "Category": "বিভাগ",
-      "Amount": "পরিমাণ",
-      "Description": "বিবরণ",
-      "General": "সাধারণ",
-      "Salaries": "বেতন",
-      "Rent": "ভাড়া",
-      "Maintenance": "রক্ষণাবেক্ষণ",
-      "Government Fees": "সরকারি ফি",
-      "Utilities": "ইউটিলিটি",
-      "Other": "অন্যান্য",
-      "Enter details...": "বিস্তারিত লিখুন...",
-
-      // Payroll page
-      "Process Payroll": "বেতন প্রক্রিয়া",
-      "Period": "সময়কাল",
-      "Net Salary": "নিট বেতন",
-      "Paid": "পরিশোধিত",
-      "Processing": "প্রক্রিয়াধীন",
-      "View Details": "বিস্তারিত দেখুন",
-      "Select Worker": "কর্মী নির্বাচন করুন",
-      "Month": "মাস",
-      "Year": "বছর",
-      "Bonuses": "বোনাস",
-      "Deductions": "কর্তন",
-      "Mark as Paid": "পরিশোধিত হিসাবে চিহ্নিত করুন",
-      "Edit Details": "বিস্তারিত সম্পাদনা করুন",
-      "Revenue Distribution": "রাজস্ব বন্টন",
-
-      // Reports page
-      "Reports Overview": "রিপোর্ট ওভারভিউ",
-      "Export to Excel": "এক্সেল এ এক্সপোর্ট করুন",
-      "Revenue vs Expenses": "আয় বনাম ব্যয়",
-      "Profit & Loss Statement": "লাভ ও লোকসান বিবরণী",
-      "Balance Sheet": "ব্যালেন্স শিট",
-      "Cash Flow Analysis": "নগদ প্রবাহ বিশ্লেষণ",
-      "Assets": "সম্পদ",
-      "Liabilities": "দায়বদ্ধতা",
-      "Equity": "ইক্যুইটি",
-      "Total Assets": "মোট সম্পদ",
-      "Total Liabilities": "মোট দায়বদ্ধতা",
-      "Total Equity": "মোট ইক্যুইটি",
-      "Total Revenue": "মোট আয়",
-      "Total Expenses": "মোট ব্যয়",
-      "Net Cash Increase/Decrease": "নিট নগদ বৃদ্ধি/হ্রাস",
-      "Cash Inflows": "নগদ প্রবাহ (ভিতরে)",
-      "Cash Outflows": "নগদ প্রবাহ (বাইরে)",
-      "Profit per Worker": "কর্মী প্রতি লাভ",
-      "Profit per Company": "কোম্পানি প্রতি লাভ",
-      "Insights": "অন্তর্দৃষ্টি",
-      "Financial Intelligence": "আর্থিক বুদ্ধিমত্তা",
-      "Real-time insights into your manpower operations": "আপনার জনবল কার্যক্রমের রিয়েল-টাইম অন্তর্দৃষ্টি",
-      "Tracking cash movement in and out": "নগদ আদান-প্রদান ট্র্যাকিং",
-      "Active Workers": "সক্রিয় কর্মী",
-      "Search": "খুঁজুন",
-      "Add": "যোগ করুন",
-      "Edit": "সম্পাদনা",
-      "Delete": "মুছুন",
-      "Save": "সংরক্ষণ",
-      "Cancel": "বাতিল",
-      "Active": "সক্রিয়",
-      "Inactive": "নিষ্ক্রিয়",
-      "Revenue": "আয়",
-      "Loading": "লোড হচ্ছে",
-      "No data available": "কোনো তথ্য উপলব্ধ নেই",
-    }
-  },
-  en: {
-    translation: {
-      "Dashboard": "Dashboard",
-      "Workers": "Workers",
-      "Clients": "Clients",
-      "Contracts": "Contracts",
-      "Payroll": "Payroll",
-      "Expenses": "Expenses",
-      "Accounting": "Accounting",
-      "Reports": "Reports",
-      "Settings": "Settings",
-      "Login": "Login",
-      "Logout": "Logout",
-      "Username": "Username",
-      "Password": "Password",
-      "Welcome back": "Welcome back",
-      "Golden Noura ERP": "Golden Noura ERP",
-      "Invalid username or password": "Invalid username or password",
-      "Connection error. Use admin / admin123 to login.": "Connection error. Use admin / admin123 to login.",
-      "Total Workers": "Total Workers",
-      "Active Workers": "Active Workers",
-      "Monthly Revenue": "Monthly Revenue",
-      "Net Profit": "Net Profit",
-      "Financial Overview": "Financial Overview",
-      "System Settings": "System Settings",
-      "Add Worker": "Add Worker",
-      "Search workers...": "Search workers...",
-      "Name": "Name",
-      "Nationality": "Nationality",
-      "Profession": "Profession",
-      "Status": "Status",
-      "Action": "Action",
-      "No workers database rows yet. Backend fully connected!": "No workers database rows yet. Backend fully connected!",
-      "Add Client": "Add Client",
-      "Search clients...": "Search clients...",
-      "Company Name": "Company Name",
-      "Contact Person": "Contact Person",
-      "Phone": "Phone",
-      "No clients added yet.": "No clients added yet.",
-      "New Contract": "New Contract",
-      "Search contracts...": "Search contracts...",
-      "Contract #": "Contract #",
-      "Client": "Client",
-      "Worker": "Worker",
-      "Rental Price": "Rental Price",
-      "No active contracts yet.": "No active contracts yet.",
-      "Add Expense": "Add Expense",
-      "Monthly Expenses": "Monthly Expenses",
-      "Category": "Category",
-      "Amount": "Amount",
-      "Description": "Description",
-      "General": "General",
-      "Salaries": "Salaries",
-      "Rent": "Rent",
-      "Maintenance": "Maintenance",
-      "Government Fees": "Government Fees",
-      "Utilities": "Utilities",
-      "Other": "Other",
-      "Enter details...": "Enter details...",
-      "Process Payroll": "Process Payroll",
-      "Period": "Period",
-      "Net Salary": "Net Salary",
-      "Paid": "Paid",
-      "Processing": "Processing",
-      "View Details": "View Details",
-      "Select Worker": "Select Worker",
-      "Month": "Month",
-      "Year": "Year",
-      "Bonuses": "Bonuses",
-      "Deductions": "Deductions",
-      "Mark as Paid": "Mark as Paid",
-      "Edit Details": "Edit Details",
-      "Revenue Distribution": "Revenue Distribution",
-      "Reports Overview": "Reports Overview",
-      "Export to Excel": "Export to Excel",
-      "Revenue vs Expenses": "Revenue vs Expenses",
-      "Profit & Loss Statement": "Profit & Loss Statement",
-      "Balance Sheet": "Balance Sheet",
-      "Cash Flow Analysis": "Cash Flow Analysis",
-      "Assets": "Assets",
-      "Liabilities": "Liabilities",
-      "Equity": "Equity",
-      "Total Assets": "Total Assets",
-      "Total Liabilities": "Total Liabilities",
-      "Total Equity": "Total Equity",
-      "Total Revenue": "Total Revenue",
-      "Total Expenses": "Total Expenses",
-      "Net Cash Increase/Decrease": "Net Cash Increase/Decrease",
-      "Cash Inflows": "Cash Inflows",
-      "Cash Outflows": "Cash Outflows",
-      "Profit per Worker": "Profit per Worker",
-      "Profit per Company": "Profit per Company",
-      "Insights": "Insights",
-      "Financial Intelligence": "Financial Intelligence",
-      "Real-time insights into your manpower operations": "Real-time insights into your manpower operations",
-      "Tracking cash movement in and out": "Tracking cash movement in and out",
-      "Search": "Search",
-      "Add": "Add",
-      "Edit": "Edit",
-      "Delete": "Delete",
-      "Save": "Save",
-      "Cancel": "Cancel",
-      "Active": "Active",
-      "Inactive": "Inactive",
-      "Revenue": "Revenue",
-      "Loading": "Loading",
-      "No data available": "No data available",
-    }
+// Save language preference
+export const saveLanguage = (lang: string) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('i18nLanguage', lang);
+    document.documentElement.dir = getDirection(lang);
+    document.documentElement.lang = lang;
   }
 };
 
+// Language names for display
+export const languageNames: Record<string, { name: string; nativeName: string; flag: string }> = {
+  ar: { name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  bn: { name: 'Bengali', nativeName: 'বাংলা', flag: '🇧🇩' },
+  en: { name: 'English', nativeName: 'English', flag: '🇬🇧' }
+};
+
+// Get next language in cycle: ar → bn → en → ar
+export const getNextLanguage = (current: string): string => {
+  const order = ['ar', 'bn', 'en'];
+  const index = order.indexOf(current);
+  return order[(index + 1) % order.length];
+};
+
+// Get print language based on document type
+export const getPrintLanguage = (currentLang: string, documentType: 'invoice' | 'contract' | 'general'): string => {
+  // Special rule: Bengali UI + Invoice/Contract → English
+  if (currentLang === 'bn' && (documentType === 'invoice' || documentType === 'contract')) {
+    return 'en';
+  }
+  return currentLang;
+};
+
+// Initialize i18n
 i18n
+  .use(HttpBackend)
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources,
-    lng: "ar",
-    fallbackLng: "ar",
-    interpolation: { escapeValue: false }
+    backend: {
+      loadPath: '/locales/{{lng}}/translation.json',
+    },
+    lng: getSavedLanguage(),
+    fallbackLng: 'ar',
+    supportedLngs: ['ar', 'bn', 'en'],
+    debug: false,
+    interpolation: {
+      escapeValue: false,
+    },
+    detection: {
+      order: ['localStorage', 'cookie', 'navigator', 'htmlTag'],
+      caches: ['localStorage', 'cookie'],
+      lookupLocalStorage: 'i18nLanguage',
+      lookupCookie: 'i18nLanguage',
+    },
+    react: {
+      useSuspense: false,
+    },
   });
+
+// Set initial direction
+if (typeof window !== 'undefined') {
+  document.documentElement.dir = getDirection(i18n.language);
+  document.documentElement.lang = i18n.language;
+}
+
+// Listen for language changes
+i18n.on('languageChanged', (lng) => {
+  saveLanguage(lng);
+  // Dispatch custom event for components to react
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: lng } }));
+  }
+});
 
 export default i18n;

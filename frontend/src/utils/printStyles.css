@@ -1,0 +1,475 @@
+/* Print Styles for Reports */
+@media print {
+  /* General Print Styles */
+  body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #333;
+    background: white;
+    margin: 0;
+    padding: 20px;
+  }
+
+  /* Hide non-printable elements */
+  .no-print,
+  .btn,
+  button,
+  input,
+  select,
+  .sidebar,
+  .header-nav,
+  .pagination,
+  .scrollbar {
+    display: none !important;
+  }
+
+  /* Page Setup */
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+
+  @page :first {
+    margin-top: 1cm;
+  }
+
+  @page :left {
+    margin-right: 3cm;
+  }
+
+  @page :right {
+    margin-left: 3cm;
+  }
+
+  /* Report Header */
+  .report-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #D4AF37;
+    padding-bottom: 20px;
+  }
+
+  .report-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .report-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+  }
+
+  .report-meta {
+    font-size: 11px;
+    color: #888;
+  }
+
+  /* Executive Summary */
+  .executive-summary {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    page-break-inside: avoid;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 15px 0;
+  }
+
+  .summary-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .summary-label {
+    font-size: 11px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+  }
+
+  .summary-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .summary-change {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .summary-change.positive {
+    color: #28a745;
+  }
+
+  .summary-change.negative {
+    color: #dc3545;
+  }
+
+  /* Tables */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 11px;
+  }
+
+  .report-table th,
+  .report-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .report-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .report-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+
+  .report-table tbody tr:hover {
+    background-color: #e9ecef;
+  }
+
+  /* Charts and Graphs */
+  .chart-container {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    page-break-inside: avoid;
+  }
+
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .chart-placeholder {
+    height: 200px;
+    background: #f8f9fa;
+    border: 1px dashed #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 12px;
+  }
+
+  /* Sections */
+  .report-section {
+    margin: 30px 0;
+    page-break-inside: avoid;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 8px;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin: 20px 0 10px 0;
+  }
+
+  /* Insights and Recommendations */
+  .insight-box {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .insight-box.warning {
+    border-left-color: #ffc107;
+    background: #fff8e1;
+  }
+
+  .insight-box.success {
+    border-left-color: #28a745;
+    background: #f1f8f9;
+  }
+
+  .insight-box.danger {
+    border-left-color: #dc3545;
+    background: #f8d7da;
+  }
+
+  .insight-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .insight-content {
+    color: #666;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  .report-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+    font-size: 10px;
+    color: #6c757d;
+  }
+
+  .footer-line {
+    margin: 5px 0;
+  }
+
+  /* Page Breaks */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .avoid-break {
+    page-break-inside: avoid;
+  }
+
+  /* Special Elements */
+  .highlight {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    font-size: 100px;
+    color: #f0f0f0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  /* Print-specific colors */
+  .text-primary {
+    color: #333 !important;
+  }
+
+  .text-secondary {
+    color: #666 !important;
+  }
+
+  .text-success {
+    color: #28a745 !important;
+  }
+
+  .text-danger {
+    color: #dc3545 !important;
+  }
+
+  .text-warning {
+    color: #ffc107 !important;
+  }
+
+  .text-info {
+    color: #17a2b8 !important;
+  }
+
+  /* Responsive adjustments for print */
+  @media print and (max-width: 8.5in) {
+    .summary-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .report-table {
+      font-size: 10px;
+    }
+    
+    .report-table th,
+    .report-table td {
+      padding: 6px 8px;
+    }
+  }
+
+  @media print and (max-width: 6in) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .report-title {
+      font-size: 20px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+    }
+  }
+
+  /* Landscape mode */
+  @media print and (orientation: landscape) {
+    @page {
+      size: A4 landscape;
+    }
+    
+    .summary-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* High-quality printing */
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+  }
+
+  /* Arabic/RTL print support */
+  @media print and (direction: rtl) {
+    .report-table th,
+    .report-table td {
+      text-align: right;
+    }
+    
+    .chart-placeholder {
+      direction: ltr;
+    }
+  }
+
+  /* Print optimization for different browsers */
+  @media print {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  @media print {
+    .avoid-column-break {
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+
+  /* Print preview adjustments */
+  .print-preview {
+    background: white;
+    max-width: 210mm;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  }
+
+  /* Company branding */
+  .company-logo {
+    max-height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .company-info {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* Signature blocks */
+  .signature-block {
+    margin-top: 60px;
+    text-align: center;
+  }
+
+  .signature-line {
+    border-bottom: 1px solid #333;
+    width: 200px;
+    margin: 0 auto 5px;
+  }
+
+  .signature-title {
+    font-size: 11px;
+    color: #666;
+  }
+
+  /* Table of contents */
+  .toc {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .toc-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .toc-item {
+    margin: 8px 0;
+    font-size: 12px;
+  }
+
+  .toc-page {
+    float: right;
+  }
+
+  /* Appendix */
+  .appendix {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid #dee2e6;
+  }
+
+  .appendix-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .appendix-section {
+    margin: 20px 0;
+  }
+
+  .appendix-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .appendix-section p {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #666;
+  }
+}

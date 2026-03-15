@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Plus, Search, Globe, Briefcase, FileText, Camera } from 'lucide-react';
+import { User, Plus, Search, Globe, Briefcase, FileText, Camera, Edit3 } from 'lucide-react';
 import DataEntryModal from '../components/common/DataEntryModal';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
+import { getUserRole, Role } from '../utils/auth';
+import api from '../api';
+import { requestApproval } from '../utils/approval';
 
 interface Worker {
   id: number;
@@ -19,6 +20,13 @@ export default function Workers() {
   const [fetching, setFetching] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editReqOpen, setEditReqOpen] = useState(false);
+  const [currentWorker, setCurrentWorker] = useState<Worker | null>(null);
+  const [editReqForm, setEditReqForm] = useState({
+    name: '',
+    profession: '',
+    salary: ''
+  });
 
   // Form State
   const [formData, setFormData] = useState({
@@ -33,11 +41,8 @@ export default function Workers() {
 
   const fetchWorkers = async () => {
     try {
-      const resp = await fetch(`${API_URL}/api/v1/workers/`);
-      if (resp.ok) {
-        const data = await resp.json();
-        setWorkers(data);
-      }
+      const resp = await api.get('/workers/');
+      setWorkers(resp.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -53,27 +58,21 @@ export default function Workers() {
     if (!formData.name) return;
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/api/v1/workers/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          salary: parseFloat(formData.salary)
-        })
+      await api.post('/workers/', {
+        ...formData,
+        salary: parseFloat(formData.salary)
       });
-      if (resp.ok) {
-        await fetchWorkers();
-        setIsModalOpen(false);
-        setFormData({
-          name: '',
-          nationality: '',
-          profession: '',
-          passport_number: '',
-          iqama_number: '',
-          salary: '0',
-          status: 'ACTIVE'
-        });
-      }
+      await fetchWorkers();
+      setIsModalOpen(false);
+      setFormData({
+        name: '',
+        nationality: '',
+        profession: '',
+        passport_number: '',
+        iqama_number: '',
+        salary: '0',
+        status: 'ACTIVE'
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -133,7 +132,23 @@ export default function Workers() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-gn-gold hover:text-gn-goldLight transition">{t('Edit')}</button>
+                      {getUserRole() === Role.ADMIN && (
+                      <button
+                        onClick={() => {
+                          setCurrentWorker(worker);
+                          setEditReqForm({
+                            name: worker.name,
+                            profession: worker.profession,
+                            salary: '0'
+                          });
+                          setEditReqOpen(true);
+                        }}
+                        className="text-gn-gold hover:text-gn-goldLight transition flex items-center gap-1 justify-center mx-auto"
+                        title={t('Request Edit')}
+                      >
+                        <Edit3 className="w-4 h-4" /> {t('Request Edit')}
+                      </button>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -210,6 +225,68 @@ export default function Workers() {
                 value={formData.iqama_number}
                 onChange={(e) => setFormData({...formData, iqama_number: e.target.value})}
                 className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none" 
+              />
+            </div>
+          </div>
+        </div>
+      </DataEntryModal>
+
+      {/* Approval Request Modal */}
+      <DataEntryModal
+        isOpen={editReqOpen}
+        onClose={() => setEditReqOpen(false)}
+        title={t('Request Edit')}
+        onSubmit={async () => {
+          if (!currentWorker) return;
+          const payload: any = {};
+          if (editReqForm.name && editReqForm.name !== currentWorker.name) payload.name = editReqForm.name;
+          if (editReqForm.profession && editReqForm.profession !== currentWorker.profession) payload.profession = editReqForm.profession;
+          if (editReqForm.salary && parseFloat(editReqForm.salary) > 0) payload.salary = parseFloat(editReqForm.salary);
+          await requestApproval({
+            target_table: 'workers',
+            target_id: currentWorker.id,
+            action: 'UPDATE',
+            payload
+          });
+          alert(t('Approval request sent to admin'));
+          setEditReqOpen(false);
+        }}
+        loading={false}
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-400 flex items-center">
+              <User className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Name')}
+            </label>
+            <input
+              type="text"
+              value={editReqForm.name}
+              onChange={(e) => setEditReqForm({ ...editReqForm, name: e.target.value })}
+              className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <Briefcase className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Profession')}
+              </label>
+              <input
+                type="text"
+                value={editReqForm.profession}
+                onChange={(e) => setEditReqForm({ ...editReqForm, profession: e.target.value })}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center">
+                <FileText className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Salary')}
+              </label>
+              <input
+                type="number"
+                value={editReqForm.salary}
+                onChange={(e) => setEditReqForm({ ...editReqForm, salary: e.target.value })}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+                placeholder="0.00"
               />
             </div>
           </div>

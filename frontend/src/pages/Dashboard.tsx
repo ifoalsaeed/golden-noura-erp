@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import api, { getApiBaseUrl } from '../api';
 import { 
   Users, 
   Building2, 
@@ -21,8 +22,7 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
+import UserAvatar from '../components/common/UserAvatar';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -35,6 +35,65 @@ export default function Dashboard() {
     netProfit: 0
   });
   const [loading, setLoading] = useState(true);
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Initialize from localStorage immediately
+  useEffect(() => {
+    const storedFullName = localStorage.getItem('full_name') || '';
+    const storedRole = localStorage.getItem('role') || '';
+    const storedAvatar = localStorage.getItem('avatar_url');
+    
+    console.log('Initial localStorage data:', { storedFullName, storedRole, storedAvatar });
+    
+    setFullName(storedFullName);
+    setRole(storedRole);
+    setAvatarUrl(storedAvatar);
+    
+    // Immediately fetch fresh data from server
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        console.log('Fetching fresh user data from server...');
+        const me = await api.get('/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const name = me?.data?.full_name || '';
+        const avatar = me?.data?.avatar_url || '';
+        const roleFromServer = me?.data?.role || '';
+        
+        console.log('Fresh data from server:', { name, avatar, roleFromServer });
+        
+        if (name) {
+          localStorage.setItem('full_name', name);
+          setFullName(name);
+          console.log('Updated full name from server:', name);
+        } else {
+          console.log('No full name found in server response');
+        }
+        if (roleFromServer) {
+          localStorage.setItem('role', roleFromServer);
+          setRole(roleFromServer);
+        }
+        if (avatar) {
+          const apiRoot = getApiBaseUrl();
+          const src = avatar.startsWith('http') ? avatar : `${apiRoot}${avatar}`;
+          setAvatarUrl(src);
+          try { localStorage.setItem('avatar_url', src); } catch {}
+        } else {
+          setAvatarUrl(null);
+          localStorage.removeItem('avatar_url');
+        }
+      } catch (error) {
+        console.log('Failed to fetch user data from server:', error);
+      }
+    }
+  };
 
   // Simulation data for 2026 visualization
   const data = [
@@ -46,30 +105,55 @@ export default function Dashboard() {
   ];
 
   useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'full_name') {
+        setFullName(localStorage.getItem('full_name') || '');
+      }
+    };
+    const onFocus = () => {
+      fetchUserData();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', onFocus);
+    const onProfileUpdated = (e: Event) => {
+      const detail = (e as CustomEvent).detail || {};
+      if (typeof detail?.full_name === 'string') {
+        setFullName(detail.full_name);
+      }
+      if (typeof detail?.avatar_url === 'string') {
+        setAvatarUrl(detail.avatar_url);
+      }
+    };
+    window.addEventListener('profile-updated', onProfileUpdated as EventListener);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('profile-updated', onProfileUpdated as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [wResp, cResp, conResp, pResp] = await Promise.all([
-          fetch(`${API_URL}/api/v1/workers/`),
-          fetch(`${API_URL}/api/v1/clients/`),
-          fetch(`${API_URL}/api/v1/contracts/`),
-          fetch(`${API_URL}/api/v1/payroll/`)
+        const [wResp, cResp, conResp, sumResp] = await Promise.all([
+          api.get('/workers/'),
+          api.get('/clients/'),
+          api.get('/contracts/'),
+          api.get('/reports/summary')
         ]);
 
-        const workers = wResp.ok ? await wResp.json() : [];
-        const clients = cResp.ok ? await cResp.json() : [];
-        const contracts = conResp.ok ? await conResp.json() : [];
-        const payroll = pResp.ok ? await pResp.json() : [];
-
-        const totalPayroll = payroll.reduce((acc: number, curr: any) => acc + curr.net_salary, 0);
-        const estimatedRevenue = (totalPayroll * 1.3) + 15000;
+        const workers = wResp.data || [];
+        const clients = cResp.data || [];
+        const contracts = conResp.data || [];
+        const summary = sumResp.data || { revenue: 0, expenses: 0, profit: 0 };
 
         setStats({
           workers: workers.length,
           activeWorkers: workers.filter((w: any) => w.status === 'ACTIVE').length || workers.length,
           clients: clients.length,
           contracts: contracts.length,
-          revenue: estimatedRevenue,
-          netProfit: estimatedRevenue * 0.2
+          revenue: summary.revenue,
+          netProfit: summary.profit
         });
       } catch (err) {
         console.error(err);
@@ -113,14 +197,29 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gn-surface/30 pb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">{t('Welcome back')}</h1>
-          <p className="text-gray-400 mt-1">{t('Here is what is happening with Golden Noura ERP today.')}</p>
+          <div className="flex items-center gap-3 mb-4">
+            <UserAvatar size="lg" />
+            <div>
+              <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                {t('Welcome, {{name}}', { name: (fullName?.trim() || localStorage.getItem('full_name') || localStorage.getItem('username') || t('User')) })}
+              </h1>
+              {role && (
+                <span className="inline-block mt-2 px-3 py-1 text-sm bg-gn-gold/20 text-gn-gold rounded-md border border-gn-gold/30">
+                  {role === 'ADMIN' ? 'مدير النظام' : role === 'DATA_ENTRY' ? 'مدخل بيانات' : role === 'REPORT_VIEWER' ? 'مشاهد تقارير' : role}
+                </span>
+              )}
+            </div>
+          </div>
+          <p className="text-gray-400 mt-4 font-medium">{t('Here is what is happening with Golden Noura ERP today.')}</p>
+          <p className="text-sm text-gn-goldLight mt-2">
+            {new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
         </div>
-        <div className="flex items-center gap-2 bg-gn-surface/50 border border-gn-surface px-4 py-2 rounded-xl text-sm text-gray-300">
-          <Calendar className="w-4 h-4 text-gn-gold" />
-          {new Date().toLocaleDateString('ar-SA')}
+        <div className="flex items-center gap-3 bg-gn-surface border border-gn-surface px-6 py-3 rounded-2xl text-sm text-gray-300 shadow-lg">
+          <Calendar className="w-5 h-5 text-gn-gold" />
+          <span className="font-semibold">{new Date().toLocaleDateString('ar-SA')}</span>
         </div>
       </header>
 

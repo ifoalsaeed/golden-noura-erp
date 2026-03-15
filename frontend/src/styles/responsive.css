@@ -1,0 +1,593 @@
+/**
+ * Golden Noura ERP - Responsive Styles
+ * متجاوب بالكامل على جميع الأجهزة
+ */
+
+/* ============================================
+   القاعدة العامة - Base Styles (Mobile First)
+   ============================================ */
+
+/* تعطيل overflow على الجسم */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* صور متجاوبة */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* الجداول متجاوبة */
+.responsive-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table table {
+  min-width: 600px;
+  width: 100%;
+}
+
+/* ============================================
+   الموبايل الصغير - Extra Small (xs)
+   أقل من 480px
+   ============================================ */
+@media (max-width: 480px) {
+  /* Layout */
+  .gn-layout {
+    flex-direction: column !important;
+  }
+
+  .gn-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 60px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  .gn-sidebar-desktop {
+    display: none !important;
+  }
+
+  .gn-sidebar-mobile {
+    display: flex !important;
+  }
+
+  .gn-main-content {
+    padding-bottom: 80px !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Header */
+  .gn-header {
+    height: auto !important;
+    min-height: 56px;
+    padding: 0.5rem !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .gn-header-logo {
+    height: 32px !important;
+  }
+
+  .gn-header-title {
+    font-size: 0.875rem !important;
+  }
+
+  .gn-header-subtitle {
+    font-size: 0.625rem !important;
+  }
+
+  .gn-header-actions {
+    gap: 0.25rem !important;
+  }
+
+  .gn-header-actions button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .gn-header-actions button span {
+    display: none !important;
+  }
+
+  /* Grid Systems */
+  .gn-grid-1, .gn-grid-2, .gn-grid-3, .gn-grid-4, .gn-grid-5, .gn-grid-6 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Cards */
+  .gn-card {
+    padding: 0.75rem !important;
+  }
+
+  .gn-card-title {
+    font-size: 0.875rem !important;
+  }
+
+  .gn-card-value {
+    font-size: 1.25rem !important;
+  }
+
+  /* Typography */
+  .gn-text-xs { font-size: 0.625rem !important; }
+  .gn-text-sm { font-size: 0.75rem !important; }
+  .gn-text-base { font-size: 0.875rem !important; }
+  .gn-text-lg { font-size: 1rem !important; }
+  .gn-text-xl { font-size: 1.125rem !important; }
+  .gn-text-2xl { font-size: 1.25rem !important; }
+  .gn-text-3xl { font-size: 1.5rem !important; }
+
+  /* Tables */
+  .gn-table th,
+  .gn-table td {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Forms */
+  .gn-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gn-input,
+  .gn-select,
+  .gn-textarea {
+    padding: 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Buttons */
+  .gn-btn {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .gn-btn-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* Charts */
+  .gn-chart-container {
+    height: 200px !important;
+  }
+
+  /* Modals */
+  .gn-modal {
+    width: 95% !important;
+    margin: 0.5rem !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Tabs */
+  .gn-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .gn-tab {
+    white-space: nowrap;
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Navigation Mobile */
+  .gn-nav-mobile {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0a0a0a;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 0.5rem;
+    justify-content: space-around;
+    z-index: 50;
+  }
+
+  .gn-nav-mobile-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.625rem;
+    color: #9ca3af;
+  }
+
+  .gn-nav-mobile-item.active {
+    color: #D4AF37;
+  }
+
+  .gn-nav-mobile-item svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ============================================
+   الموبايل المتوسط - Small (sm)
+   481px – 767px
+   ============================================ */
+@media (min-width: 481px) and (max-width: 767px) {
+  /* Layout */
+  .gn-layout {
+    flex-direction: column !important;
+  }
+
+  .gn-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 70px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .gn-sidebar-desktop {
+    display: none !important;
+  }
+
+  .gn-sidebar-mobile {
+    display: flex !important;
+  }
+
+  .gn-main-content {
+    padding-bottom: 90px !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  /* Header */
+  .gn-header {
+    height: auto !important;
+    min-height: 60px;
+    padding: 0.75rem !important;
+  }
+
+  .gn-header-logo {
+    height: 36px !important;
+  }
+
+  /* Grid Systems */
+  .gn-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .gn-grid-3,
+  .gn-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .gn-grid-5,
+  .gn-grid-6 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Cards */
+  .gn-card {
+    padding: 1rem !important;
+  }
+
+  .gn-card-value {
+    font-size: 1.5rem !important;
+  }
+
+  /* Typography */
+  .gn-text-xs { font-size: 0.75rem !important; }
+  .gn-text-sm { font-size: 0.875rem !important; }
+  .gn-text-base { font-size: 1rem !important; }
+  .gn-text-lg { font-size: 1.125rem !important; }
+  .gn-text-xl { font-size: 1.25rem !important; }
+  .gn-text-2xl { font-size: 1.5rem !important; }
+  .gn-text-3xl { font-size: 1.875rem !important; }
+
+  /* Forms */
+  .gn-form-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Tables */
+  .gn-table th,
+  .gn-table td {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Charts */
+  .gn-chart-container {
+    height: 250px !important;
+  }
+
+  /* Navigation Mobile */
+  .gn-nav-mobile {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0a0a0a;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+    padding: 0.5rem;
+    justify-content: space-around;
+    z-index: 50;
+  }
+
+  .gn-nav-mobile-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .gn-nav-mobile-item svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ============================================
+   التابلت - Medium (md)
+   768px – 1024px
+   ============================================ */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Sidebar */
+  .gn-sidebar {
+    width: 200px !important;
+  }
+
+  .gn-sidebar-collapsed {
+    width: 60px !important;
+  }
+
+  .gn-sidebar-collapsed .gn-sidebar-text {
+    display: none !important;
+  }
+
+  .gn-main-content {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  /* Header */
+  .gn-header {
+    padding: 0.75rem 1rem !important;
+  }
+
+  /* Grid Systems */
+  .gn-grid-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .gn-grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .gn-grid-5 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .gn-grid-6 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Cards */
+  .gn-card {
+    padding: 1.25rem !important;
+  }
+
+  .gn-card-value {
+    font-size: 1.75rem !important;
+  }
+
+  /* Typography */
+  .gn-text-xs { font-size: 0.75rem !important; }
+  .gn-text-sm { font-size: 0.875rem !important; }
+  .gn-text-base { font-size: 1rem !important; }
+  .gn-text-lg { font-size: 1.125rem !important; }
+  .gn-text-xl { font-size: 1.25rem !important; }
+  .gn-text-2xl { font-size: 1.5rem !important; }
+  .gn-text-3xl { font-size: 1.875rem !important; }
+
+  /* Forms */
+  .gn-form-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Charts */
+  .gn-chart-container {
+    height: 300px !important;
+  }
+}
+
+/* ============================================
+   اللابتوب الصغير - Large (lg)
+   1025px – 1366px
+   ============================================ */
+@media (min-width: 1025px) and (max-width: 1366px) {
+  /* Sidebar */
+  .gn-sidebar {
+    width: 240px !important;
+  }
+
+  .gn-main-content {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  /* Grid Systems */
+  .gn-grid-4 {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  .gn-grid-5 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .gn-grid-6 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* Cards */
+  .gn-card {
+    padding: 1.5rem !important;
+  }
+
+  /* Charts */
+  .gn-chart-container {
+    height: 350px !important;
+  }
+}
+
+/* ============================================
+   الكمبيوتر الكبير - Extra Large (xl)
+   أكثر من 1366px
+   ============================================ */
+@media (min-width: 1367px) {
+  /* Sidebar */
+  .gn-sidebar {
+    width: 256px !important;
+  }
+
+  .gn-main-content {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* Grid Systems */
+  .gn-grid-5 {
+    grid-template-columns: repeat(5, 1fr) !important;
+  }
+
+  .gn-grid-6 {
+    grid-template-columns: repeat(6, 1fr) !important;
+  }
+
+  /* Cards */
+  .gn-card {
+    padding: 1.5rem !important;
+  }
+
+  /* Charts */
+  .gn-chart-container {
+    height: 400px !important;
+  }
+}
+
+/* ============================================
+   Utilities متجاوبة
+   ============================================ */
+
+/* إخفاء/إظهار حسب الشاشة */
+.gn-hidden-xs { display: inherit; }
+.gn-hidden-sm { display: inherit; }
+.gn-hidden-md { display: inherit; }
+.gn-hidden-lg { display: inherit; }
+.gn-hidden-xl { display: inherit; }
+
+.gn-visible-xs { display: none !important; }
+.gn-visible-sm { display: none !important; }
+.gn-visible-md { display: none !important; }
+.gn-visible-lg { display: none !important; }
+.gn-visible-xl { display: none !important; }
+
+@media (max-width: 480px) {
+  .gn-hidden-xs { display: none !important; }
+  .gn-visible-xs { display: inherit !important; }
+}
+
+@media (min-width: 481px) and (max-width: 767px) {
+  .gn-hidden-sm { display: none !important; }
+  .gn-visible-sm { display: inherit !important; }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .gn-hidden-md { display: none !important; }
+  .gn-visible-md { display: inherit !important; }
+}
+
+@media (min-width: 1025px) and (max-width: 1366px) {
+  .gn-hidden-lg { display: none !important; }
+  .gn-visible-lg { display: inherit !important; }
+}
+
+@media (min-width: 1367px) {
+  .gn-hidden-xl { display: none !important; }
+  .gn-visible-xl { display: inherit !important; }
+}
+
+/* Flex wrap حسب الشاشة */
+.gn-flex-wrap-xs { flex-wrap: nowrap; }
+.gn-flex-wrap-sm { flex-wrap: nowrap; }
+
+@media (max-width: 767px) {
+  .gn-flex-wrap-xs { flex-wrap: wrap !important; }
+  .gn-flex-wrap-sm { flex-wrap: wrap !important; }
+}
+
+/* ============================================
+   Scrollbar تخصيص
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e5c158;
+}
+
+/* ============================================
+   Touch optimizations للموبايل
+   ============================================ */
+@media (hover: none) and (pointer: coarse) {
+  /* زيادة حجم الأهداف القابلة للنقر */
+  button,
+  a,
+  .gn-clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* إزالة hover effects على الموبايل */
+  .hover\:bg-gn-gold\/10:hover,
+  .hover\:bg-gn-surface:hover {
+    background-color: transparent !important;
+  }
+
+  /* تفعيل active states */
+  button:active,
+  a:active {
+    opacity: 0.7;
+  }
+}

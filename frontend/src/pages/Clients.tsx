@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, Plus, Search, Phone, Mail, MapPin } from 'lucide-react';
+import { Building2, Plus, Search, Phone, Mail, MapPin, Edit3 } from 'lucide-react';
 import DataEntryModal from '../components/common/DataEntryModal';
-
-const API_URL = import.meta.env.VITE_API_URL || '';
+import api from '../api';
+import { requestApproval } from '../utils/approval';
+import { getUserRole, Role } from '../utils/auth';
 
 interface Client {
   id: number;
@@ -32,11 +33,8 @@ export default function Clients() {
 
   const fetchClients = async () => {
     try {
-      const resp = await fetch(`${API_URL}/api/v1/clients/`);
-      if (resp.ok) {
-        const data = await resp.json();
-        setClients(data);
-      }
+      const resp = await api.get('/clients/');
+      setClients(resp.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -52,23 +50,17 @@ export default function Clients() {
     if (!formData.company_name) return;
     setLoading(true);
     try {
-      const resp = await fetch(`${API_URL}/api/v1/clients/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+      await api.post('/clients/', formData);
+      await fetchClients();
+      setIsModalOpen(false);
+      setFormData({
+          company_name: '',
+          contact_person: '',
+          phone: '',
+          email: '',
+          city: '',
+          address: ''
       });
-      if (resp.ok) {
-        await fetchClients();
-        setIsModalOpen(false);
-        setFormData({
-            company_name: '',
-            contact_person: '',
-            phone: '',
-            email: '',
-            city: '',
-            address: ''
-        });
-      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -122,7 +114,7 @@ export default function Clients() {
                     <td className="px-6 py-4">{client.contact_person}</td>
                     <td className="px-6 py-4">{client.phone}</td>
                     <td className="px-6 py-4">
-                      <button className="text-gn-gold hover:text-gn-goldLight transition">{t('Edit')}</button>
+                      {getUserRole() === Role.ADMIN && <RequestEditButton client={client} />}
                     </td>
                   </tr>
                 ))
@@ -203,5 +195,80 @@ export default function Clients() {
         </div>
       </DataEntryModal>
     </div>
+  );
+}
+
+function RequestEditButton({ client }: { client: Client }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    company_name: client.company_name,
+    phone: client.phone || '',
+    email: ''
+  });
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="text-gn-gold hover:text-gn-goldLight transition flex items-center gap-1 justify-center mx-auto"
+        title={t('Request Edit')}
+      >
+        <Edit3 className="w-4 h-4" /> {t('Request Edit')}
+      </button>
+      <DataEntryModal
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title={t('Request Edit')}
+        onSubmit={async () => {
+          const payload: any = {};
+          if (form.company_name && form.company_name !== client.company_name) payload.company_name = form.company_name;
+          if (form.phone && form.phone !== (client as any).phone) payload.phone = form.phone;
+          if (form.email) payload.email = form.email;
+          await requestApproval({ target_table: 'clients', target_id: client.id, action: 'UPDATE', payload });
+          alert(t('Approval request sent to admin'));
+          setOpen(false);
+        }}
+        loading={false}
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-400">{t('Company Name')}</label>
+            <input
+              type="text"
+              value={form.company_name}
+              onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+              className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center"><Phone className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Phone')}</label>
+              <input
+                type="text"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-400 flex items-center"><Mail className="w-4 h-4 mr-2 ml-2 text-gn-gold" /> {t('Email')}</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-400">{t('Reason')}</label>
+            <textarea
+              className="w-full bg-gn-blackLight border border-gn-surface rounded-xl px-4 py-3 text-white focus:border-gn-gold outline-none h-20"
+              placeholder=""
+            />
+          </div>
+        </div>
+      </DataEntryModal>
+    </>
   );
 }

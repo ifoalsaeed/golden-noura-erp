@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from db.database import get_db
 from db.models import Payroll, Expense, Contract, Account, JournalEntry
+from services.financial_report_service import FinancialReportService
 from schemas.reports import (
     FinancialSummary, TimelinePoint, ProfitLossResponse, 
     ProfitLossItem, BalanceSheetResponse, CashFlowResponse, CashFlowItem
 )
-from datetime import date
-from typing import List, Any
+from datetime import date, timedelta
+from typing import List, Any, Optional
 import pandas as pd
 import io
 from fastapi.responses import StreamingResponse
@@ -17,109 +18,98 @@ router = APIRouter()
 
 @router.get("/summary", response_model=FinancialSummary)
 def get_financial_summary(db: Session = Depends(get_db)):
-    total_payroll = db.query(func.sum(Payroll.net_salary)).scalar() or 0.0
-    total_general_expenses = db.query(func.sum(Expense.amount)).scalar() or 0.0
-    total_revenue = db.query(func.sum(Contract.monthly_rental_price)).filter(Contract.status == "ACTIVE").scalar() or 0.0
+    # Use Financial Report Service for accurate GL-based summary
+    service = FinancialReportService(db)
     
-    total_expenses = total_payroll + total_general_expenses
-    profit = total_revenue - total_expenses
+    # Default to current year
+    start_date = date(date.today().year, 1, 1)
+    end_date = date.today()
+    
+    pl = service.get_profit_and_loss(start_date, end_date)
     
     return {
-        "revenue": float(total_revenue),
-        "expenses": float(total_expenses),
-        "profit": float(profit)
+        "revenue": pl["revenue"]["total"],
+        "expenses": pl["expenses"]["total"],
+        "profit": pl["net_profit"]
     }
 
 @router.get("/timeline", response_model=List[TimelinePoint])
 def get_financial_timeline(db: Session = Depends(get_db)):
+    # Improve timeline to use GL data
     results = []
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     current_year = date.today().year
+    service = FinancialReportService(db)
     
     for i in range(1, 13):
-        month_payroll = db.query(func.sum(Payroll.net_salary)).filter(
-            Payroll.month == i, Payroll.year == current_year
-        ).scalar() or 0.0
-        
-        month_expenses = db.query(func.sum(Expense.amount)).filter(
-            func.strftime('%m', Expense.date) == f"{i:02d}",
-            func.strftime('%Y', Expense.date) == str(current_year)
-        ).scalar() or 0.0
-
-        revenue = db.query(func.sum(Contract.monthly_rental_price)).filter(Contract.status == "ACTIVE").scalar() or 0.0
+        # Determine start and end of month
+        if i == 12:
+            start_dt = date(current_year, i, 1)
+            end_dt = date(current_year, 12, 31)
+        else:
+            start_dt = date(current_year, i, 1)
+            end_dt = date(current_year, i+1, 1) - timedelta(days=1)
+            
+        pl = service.get_profit_and_loss(start_dt, end_dt)
         
         results.append({
             "name": months[i-1],
-            "revenue": float(revenue),
-            "expenses": float(month_payroll) + float(month_expenses)
+            "revenue": pl["revenue"]["total"],
+            "expenses": pl["expenses"]["total"]
         })
         
     return results
 
 @router.get("/profit-loss", response_model=ProfitLossResponse)
-def get_profit_loss(db: Session = Depends(get_db)):
-    # Revenue items
-    revenue_rental = db.query(func.sum(Contract.monthly_rental_price)).filter(Contract.status == "ACTIVE").scalar() or 0.0
-    revenue_items = [ProfitLossItem(category="Manpower Rental", amount=float(revenue_rental))]
-    
-    # Expense items
-    payroll_expense = db.query(func.sum(Payroll.net_salary)).scalar() or 0.0
-    
-    # Group other expenses by category
-    expense_groups = db.query(Expense.category, func.sum(Expense.amount)).group_by(Expense.category).all()
-    expense_items = [ProfitLossItem(category="Salaries & Wages", amount=float(payroll_expense))]
-    for cat, amt in expense_groups:
-        expense_items.append(ProfitLossItem(category=cat, amount=float(amt)))
+def get_profit_loss(
+    start_date: Optional[date] = None, 
+    end_date: Optional[date] = None, 
+    db: Session = Depends(get_db)
+):
+    if not start_date:
+        start_date = date(date.today().year, 1, 1)
+    if not end_date:
+        end_date = date.today()
         
-    total_revenue = revenue_rental
-    total_expenses = payroll_expense + sum(float(amt) for _, amt in expense_groups)
+    service = FinancialReportService(db)
+    pl_data = service.get_profit_and_loss(start_date, end_date)
+    
+    # Map to schema
+    revenue_items = [
+        ProfitLossItem(category=acc["name"], amount=acc["balance"]) 
+        for acc in pl_data["revenue"]["accounts"]
+    ]
+    
+    expense_items = [
+        ProfitLossItem(category=acc["name"], amount=acc["balance"]) 
+        for acc in pl_data["expenses"]["accounts"]
+    ]
     
     return {
         "revenue_items": revenue_items,
         "expense_items": expense_items,
-        "total_revenue": float(total_revenue),
-        "total_expenses": float(total_expenses),
-        "net_profit": float(total_revenue - total_expenses)
+        "total_revenue": pl_data["revenue"]["total"],
+        "total_expenses": pl_data["expenses"]["total"],
+        "net_profit": pl_data["net_profit"]
     }
 
 @router.get("/balance-sheet", response_model=BalanceSheetResponse)
-def get_balance_sheet(db: Session = Depends(get_db)):
-    end_date = date.today()
+def get_balance_sheet(
+    as_of_date: Optional[date] = None, 
+    db: Session = Depends(get_db)
+):
+    if not as_of_date:
+        as_of_date = date.today()
+        
+    service = FinancialReportService(db)
+    bs_data = service.get_balance_sheet(as_of_date)
     
-    def get_balances(acc_type):
-        accounts = db.query(Account).filter(Account.account_type == acc_type).all()
-        items = []
-        total = 0.0
-        for acc in accounts:
-            debit_sum = db.query(func.sum(JournalEntry.debit)).filter(JournalEntry.account_id == acc.id, JournalEntry.date <= end_date).scalar() or 0.0
-            credit_sum = db.query(func.sum(JournalEntry.credit)).filter(JournalEntry.account_id == acc.id, JournalEntry.date <= end_date).scalar() or 0.0
-            
-            if acc_type == "ASSET":
-                balance = debit_sum - credit_sum
-            else:
-                balance = credit_sum - debit_sum
-                
-            items.append({"name": acc.name, "code": acc.code, "balance": float(balance)})
-            total += float(balance)
-        return {"items": items, "total": total}
-
-    assets_data = get_balances("ASSET")
-    liabilities_data = get_balances("LIABILITY")
-    
-    # Net Income Calculation for Equity
-    total_rev = db.query(func.sum(Contract.monthly_rental_price)).filter(Contract.status == "ACTIVE").scalar() or 0.0
-    total_exp = (db.query(func.sum(Payroll.net_salary)).scalar() or 0.0) + (db.query(func.sum(Expense.amount)).scalar() or 0.0)
-    net_income = float(total_rev) - float(total_exp)
-    
-    equity_data = get_balances("EQUITY")
-    equity_data["items"].append({"name": "Net Income (Retained)", "code": "NI", "balance": float(net_income)})
-    equity_data["total"] = float(equity_data["total"]) + float(net_income)
-    
+    # Return directly as the structure matches nicely with Dict[str, Any]
     return {
-        "assets": assets_data,
-        "liabilities": liabilities_data,
-        "equity": equity_data,
-        "total_liabilities_and_equity": float(liabilities_data["total"]) + float(equity_data["total"])
+        "assets": bs_data["assets"],
+        "liabilities": bs_data["liabilities"],
+        "equity": bs_data["equity"],
+        "total_liabilities_and_equity": bs_data["liabilities"]["total"] + bs_data["equity"]["total"]
     }
 
 @router.get("/cash-flow", response_model=CashFlowResponse)
